@@ -1,5 +1,12 @@
 import { LocalAuthenticationGuard } from './guards/local-authentication.guard';
-import { Controller, Post, Body, UseGuards, Request } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Request,
+  Get,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Request as ExpressRequest } from 'express';
 import JwtRefreshGuard from './guards/jwt-refresh-authentication.guard';
@@ -28,6 +35,7 @@ import { AuditResourceDto } from '../audit/enum/audit-resource.enum';
 import { SignInDto } from './dtos/sign-in.dto';
 import { ExceptionDto } from 'src/exception/dto/exception.dto';
 import { UserResponseDto } from './dtos/responses/user-response.dto';
+import GoogleGuard from './guards/google.guard';
 
 @Controller('api/auth')
 @ApiTags('Authentication')
@@ -58,9 +66,9 @@ export class AuthController {
    * @param user the user (user is injected by the LocalAuthenticationGuard (local strategy))
    */
   @Post('login')
-  @ApiCookieAuth()
   @UseGuards(LocalAuthenticationGuard)
   @Audit(AuditActionDto.LogIn, AuditResourceDto.User)
+  @ApiCookieAuth()
   @ApiOperation({ summary: 'Log in' })
   @ApiCreatedResponse({
     description: 'The user has been successfully logged in',
@@ -199,5 +207,15 @@ export class AuthController {
     @Body() verifyAccountDto: VerifyAccountDto,
   ): Promise<void> {
     return this.authService.verifyAccount(verifyAccountDto);
+  }
+
+  @Get('google')
+  @UseGuards(GoogleGuard)
+  async googleAuth(@Request() request: ExpressRequest) {}
+
+  @Get('google/callback')
+  @UseGuards(GoogleGuard)
+  googleAuthRedirect(@Request() request: ExpressRequest) {
+    return this.authService.googleLogin(request);
   }
 }

@@ -347,6 +347,16 @@ export class AuthService {
     }
   }
 
+  async googleLogin(request: Request) {
+    if (!request.user) {
+      return 'No user from google';
+    }
+    return {
+      message: 'User Info from Google',
+      user: request.user,
+    };
+  }
+
   /**
    * Generates a jwt access or refresh token
    * @param email the users email

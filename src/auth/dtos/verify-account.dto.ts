@@ -4,5 +4,5 @@ import { IsString } from 'class-validator';
 export class VerifyAccountDto {
   @ApiProperty()
   @IsString()
-  readonly token: string;
+  token: string;
 }
