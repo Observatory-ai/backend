@@ -40,19 +40,21 @@ export class UserService {
    * @returns the created user document
    */
   async create(createUserDto: CreateUserDto): Promise<User> {
-    createUserDto.password = await this.hash(createUserDto.password);
+    if (createUserDto.password) {
+      createUserDto.password = await this.hash(createUserDto.password);
+    }
     const createdUser: User = await this.userRepository.createAndSave(
       createUserDto,
     );
     let verifyAccountToken: Token;
     if (!createdUser.isVerified) {
       verifyAccountToken = await this.createVerifyAccountToken(createdUser);
+      const userToken: UserTokenDto = {
+        user: createdUser,
+        token: verifyAccountToken.uuid,
+      };
+      this.mailService.handleUserCreated(userToken);
     }
-    const userToken: UserTokenDto = {
-      user: createdUser,
-      token: verifyAccountToken.uuid,
-    };
-    this.mailService.handleUserCreated(userToken);
     return createdUser;
   }
 
@@ -86,7 +88,6 @@ export class UserService {
   /**
    * Find a user by email or username
    * @param emailOrUsername the users email or username
-   * @param checkEnabledAndVerified check if the user is enabled and verified
    * @throws UserNotFoundException
    * @throws AccountDisabledException
    * @throws AccountNotVerifiedException
@@ -105,17 +106,13 @@ export class UserService {
   /**
    * Find a user by email
    * @param email the users email
-   * @param checkEnabledAndVerified check if the user is enabled and verified
    * @throws UserNotFoundException
    * @throws AccountDisabledException
    * @throws AccountNotVerifiedException
    * @returns a user
    */
-  async findByEmail(email: string): Promise<User> {
+  async getByEmail(email: string): Promise<User> {
     const user: User = await this.userRepository.findByUsernameOrEmail(email);
-    if (!user) throw new UserNotFoundException(email);
-    if (!user.isActive) throw new AccountDisabledException(email);
-    // if (!user.isVerified) throw new AccountNotVerifiedException(email);
     return user;
   }
 
@@ -129,7 +126,7 @@ export class UserService {
     email: string,
     refreshToken: string,
   ): Promise<User> {
-    const user: User = await this.findByEmail(email);
+    const user: User = await this.findByEmailOrUsername(email);
     if (!user.refreshToken) return;
     const refreshTokensMatch: boolean = await bcrypt.compare(
       refreshToken,
@@ -140,12 +137,12 @@ export class UserService {
 
   /**
    * Checks whether a user exists or not
-   * @param userId the users uuid
+   * @param userUuid the user's uuid or the user's email
    * @throws UserWithIdNotFoundException
    */
-  async doesExist(userId: string): Promise<void> {
-    const user: User = await this.userRepository.findByUuid(userId);
-    if (!user) throw new UserWithIdNotFoundException(userId);
+  async doesExist(userUuid: string): Promise<void> {
+    const user: User = await this.userRepository.findByUuid(userUuid);
+    if (!user) throw new UserWithIdNotFoundException(userUuid);
   }
 
   /**

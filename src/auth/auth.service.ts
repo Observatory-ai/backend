@@ -1,10 +1,8 @@
 import { TokenPayload } from './interfaces/token-payload.interface';
 import { ConfigService } from '@nestjs/config';
 import {
-  BadRequestException,
   Injectable,
   InternalServerErrorException,
-  ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -26,7 +24,6 @@ import { TokenService } from '../token/token.service';
 import { CreateTokenDto } from '../token/dto/create-token.dto';
 import { v4 } from 'uuid';
 import { UserService } from '../user/user.service';
-import { SignUpDto } from './dtos/sign-up.dto';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { RequestWithUser } from '../utils/requests.interface';
 import { Config, JwtConfig } from '../config/configuration.interface';
@@ -60,22 +57,14 @@ export class AuthService {
 
   /**
    * Creates a user
-   * @param signUpDto the user to create
+   * @param createUserDto the user to create
    * @param response the server response instance
    * @returns the user
    */
-  async register(signUpDto: SignUpDto): Promise<UserResponseDto> {
-    const { email, username, password, birthday } = signUpDto;
-    const uuid = v4();
-    const createUser: CreateUserDto = {
-      email,
-      username,
-      password,
-      birthday,
-      uuid,
-      isVerified: false,
-    };
-    const user = await this.userService.create(createUser);
+  async register(createUserDto: CreateUserDto): Promise<UserResponseDto> {
+    const uuid = await v4();
+    createUserDto.uuid = uuid;
+    const user = await this.userService.create(createUserDto);
     const userResponseDto = plainToClass(UserResponseDto, user);
     return userResponseDto;
   }
@@ -165,7 +154,7 @@ export class AuthService {
    * @param forgotPasswordDto forgot password details
    */
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<void> {
-    const user: User = await this.userService.findByEmail(
+    const user: User = await this.userService.findByEmailOrUsername(
       forgotPasswordDto.email,
     );
 
@@ -305,7 +294,7 @@ export class AuthService {
           AuthTokenType.Access,
         );
         if (!decodedAccessToken) throw new UnauthorizedException();
-        const user: User = await this.userService.findByEmail(
+        const user: User = await this.userService.findByEmailOrUsername(
           decodedAccessToken.email,
         );
         request.user = user;
@@ -345,16 +334,6 @@ export class AuthService {
       await this.logOut(response);
       throw new UnauthorizedException();
     }
-  }
-
-  async googleLogin(request: Request) {
-    if (!request.user) {
-      return 'No user from google';
-    }
-    return {
-      message: 'User Info from Google',
-      user: request.user,
-    };
   }
 
   /**

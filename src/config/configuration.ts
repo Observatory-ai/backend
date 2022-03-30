@@ -32,4 +32,8 @@ export default () => ({
     username: process.env.SMTP_USERNAME,
     password: process.env.SMTP_PASSWORD,
   },
+  google: {
+    authClientId: process.env.GOOGLE_AUTH_CLIENT_ID,
+    authClientSecret: process.env.GOOGLE_AUTH_CLIENT_SECRET,
+  },
 });

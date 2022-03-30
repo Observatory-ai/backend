@@ -42,7 +42,7 @@ async function bootstrap() {
       'openapi' | 'info' | 'servers' | 'security' | 'tags' | 'externalDocs'
     > = new DocumentBuilder()
       .setTitle('Observatory Auth Server API')
-      .setDescription('The Auth API for PolHub')
+      .setDescription('The Auth API for Observatory')
       .setVersion(`v${version}`)
       .addCookieAuth(COOKIE_CONFIG[AuthTokenType.Access].name)
       .build();

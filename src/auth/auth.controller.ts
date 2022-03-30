@@ -5,7 +5,7 @@ import {
   Body,
   UseGuards,
   Request,
-  Get,
+  Headers,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Request as ExpressRequest } from 'express';
@@ -35,10 +35,12 @@ import { AuditResourceDto } from '../audit/enum/audit-resource.enum';
 import { SignInDto } from './dtos/sign-in.dto';
 import { ExceptionDto } from 'src/exception/dto/exception.dto';
 import { UserResponseDto } from './dtos/responses/user-response.dto';
-import GoogleGuard from './guards/google.guard';
+import { AuthMethod } from '../user/enum/auth-method.enum';
+import { CreateUserDto } from '../user/dto/create-user.dto';
+import { Locale } from '../user/enum/locale.enum';
 
 @Controller('api/auth')
-@ApiTags('Authentication')
+@ApiTags('Local Authentication')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
@@ -56,8 +58,24 @@ export class AuthController {
     type: ExceptionDto,
   })
   @ApiBody({ type: SignUpDto })
-  register(@Body() signUpDto: SignUpDto): Promise<UserResponseDto> {
-    return this.authService.register(signUpDto);
+  register(
+    @Headers('accept-language') acceptLanguage: any,
+    @Body() signUpDto: SignUpDto,
+  ): Promise<UserResponseDto> {
+    let createUserDto: CreateUserDto = {
+      email: signUpDto.email,
+      username: signUpDto.username,
+      firstName: null,
+      lastName: null,
+      avatar: null,
+      password: signUpDto.password,
+      uuid: null,
+      googleId: null,
+      isVerified: false,
+      authMethod: AuthMethod.Local,
+      locale: Locale.en_CA, // change to acceptLanguage
+    };
+    return this.authService.register(createUserDto);
   }
 
   /**
@@ -66,9 +84,9 @@ export class AuthController {
    * @param user the user (user is injected by the LocalAuthenticationGuard (local strategy))
    */
   @Post('login')
+  @ApiCookieAuth()
   @UseGuards(LocalAuthenticationGuard)
   @Audit(AuditActionDto.LogIn, AuditResourceDto.User)
-  @ApiCookieAuth()
   @ApiOperation({ summary: 'Log in' })
   @ApiCreatedResponse({
     description: 'The user has been successfully logged in',
@@ -207,15 +225,5 @@ export class AuthController {
     @Body() verifyAccountDto: VerifyAccountDto,
   ): Promise<void> {
     return this.authService.verifyAccount(verifyAccountDto);
-  }
-
-  @Get('google')
-  @UseGuards(GoogleGuard)
-  async googleAuth(@Request() request: ExpressRequest) {}
-
-  @Get('google/callback')
-  @UseGuards(GoogleGuard)
-  googleAuthRedirect(@Request() request: ExpressRequest) {
-    return this.authService.googleLogin(request);
   }
 }

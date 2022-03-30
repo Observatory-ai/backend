@@ -21,6 +21,7 @@ import {
 import { commaDelimitedLogLevel } from './utils/regex.patterns';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { AuditModule } from './audit/audit.module';
+import { GoogleAuthModule } from './google-auth/google-auth.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -53,6 +54,8 @@ import { AuditModule } from './audit/audit.module';
         SMTP_SECURE: Joi.boolean().required(),
         SMTP_USERNAME: Joi.string().required(),
         SMTP_PASSWORD: Joi.string().required(),
+        GOOGLE_AUTH_CLIENT_ID: Joi.string().required(),
+        GOOGLE_AUTH_CLIENT_SECRET: Joi.string().required(),
       }),
     }),
     MailerModule.forRootAsync({
@@ -107,6 +110,7 @@ import { AuditModule } from './audit/audit.module';
     TokenModule,
     LoggerModule,
     AuditModule,
+    GoogleAuthModule,
   ],
 })
 export class AppModule {

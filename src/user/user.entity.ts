@@ -11,6 +11,8 @@ import {
 } from 'typeorm';
 import { Token } from '../token/token.entity';
 import { AuditLog } from '../audit/audit-log.entity';
+import { AuthMethod } from './enum/auth-method.enum';
+import { Locale } from './enum/locale.enum';
 
 @Entity()
 export class User extends BaseEntity {
@@ -20,6 +22,9 @@ export class User extends BaseEntity {
   @Index({ unique: true })
   @Column({ type: 'uuid', unique: true, nullable: false })
   uuid: string;
+
+  @Column({ unique: true, nullable: true })
+  googleId: string;
 
   @Column({ nullable: true })
   refreshToken?: string;
@@ -49,8 +54,11 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   lastName: string;
 
-  @Column({ type: 'date' })
-  birthday: Date;
+  @Column({ type: 'enum', enum: AuthMethod, nullable: false })
+  authMethod: AuthMethod;
+
+  @Column({ type: 'enum', enum: Locale, nullable: true })
+  locale: Locale;
 
   @OneToMany(() => Token, (token) => token.user)
   tokens: Token[];

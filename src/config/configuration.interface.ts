@@ -5,6 +5,7 @@ interface Config extends AppConfig {
   admin: AdminConfig;
   jwt: JwtConfig;
   smtp: SmtpConfig;
+  google: GoogleConfig;
 }
 
 /**
@@ -70,6 +71,11 @@ interface SmtpConfig {
   password: string;
 }
 
+interface GoogleConfig {
+  authClientId: string;
+  authClientSecret: string;
+}
+
 /**
  * The server environment configuration
  */
@@ -97,6 +103,7 @@ export {
   JwtAccessConfig,
   JwtRefreshConfig,
   SmtpConfig,
+  GoogleConfig,
   EnvironmentConfig,
   LogLevel,
   DatabaseConfig,

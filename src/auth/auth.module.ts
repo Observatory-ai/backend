@@ -11,7 +11,6 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthTokenType, COOKIE_CONFIG } from './configs/cookie.config';
 import { AuthService } from './auth.service';
 import { Config, JwtConfig } from '../config/configuration.interface';
-import { GoogleStrategy } from './strategies/google.strategy';
 
 @Global()
 @Module({
@@ -30,13 +29,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
     TokenModule,
   ],
   controllers: [AuthController],
-  providers: [
-    AuthService,
-    LocalStrategy,
-    JwtStrategy,
-    JwtRefreshStrategy,
-    GoogleStrategy,
-  ],
+  providers: [AuthService, LocalStrategy, JwtStrategy, JwtRefreshStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}

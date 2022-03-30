@@ -1,5 +1,4 @@
-import { DateUtil } from '../utils/date.util';
-import { EntityRepository, LessThanOrEqual, Repository } from 'typeorm';
+import { EntityRepository, Repository } from 'typeorm';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -28,15 +27,31 @@ export class UserRepository extends Repository<User> {
   }
 
   async createAndSave(createUserDto: CreateUserDto): Promise<User> {
-    const { email, username, password, birthday, uuid, isVerified } =
-      createUserDto;
+    const {
+      email,
+      username,
+      password,
+      uuid,
+      isVerified,
+      locale,
+      authMethod,
+      googleId,
+      firstName,
+      lastName,
+      avatar,
+    } = createUserDto;
     let user = new User();
     user.email = email;
     user.username = username;
+    user.firstName = firstName;
+    user.lastName = lastName;
     user.password = password;
-    user.birthday = birthday;
+    user.avatar = avatar;
     user.uuid = uuid;
+    user.googleId = googleId;
     user.isVerified = isVerified;
+    user.locale = locale;
+    user.authMethod = authMethod;
     user.isActive = true;
 
     try {
