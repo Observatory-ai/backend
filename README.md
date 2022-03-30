@@ -7,6 +7,7 @@ $ yarn install
 ```
 
 ## Example .env file
+
 ```dosini
 # Node Environment
 NODE_ENV=development
@@ -28,6 +29,9 @@ SMTP_PORT=
 SMTP_SECURE=
 SMTP_USERNAME=
 SMTP_PASSWORD=
+# Google
+GOOGLE_AUTH_CLIENT_ID=
+GOOGLE_AUTH_CLIENT_SECRET=
 ```
 
 ## Running the API
