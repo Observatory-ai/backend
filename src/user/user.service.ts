@@ -35,9 +35,7 @@ export class UserService {
   /**
    * Create a user
    * @param createUserDto the user to create
-   * @param role the users role
-   * @param verify verify the user
-   * @returns the created user document
+   * @returns the created user
    */
   async create(createUserDto: CreateUserDto): Promise<User> {
     if (createUserDto.password) {

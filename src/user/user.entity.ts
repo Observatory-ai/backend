@@ -13,6 +13,7 @@ import { Token } from '../token/token.entity';
 import { AuditLog } from '../audit/audit-log.entity';
 import { AuthMethod } from './enum/auth-method.enum';
 import { Locale } from './enum/locale.enum';
+import { Service } from '../service-integration/service.entity';
 
 @Entity()
 export class User extends BaseEntity {
@@ -37,7 +38,7 @@ export class User extends BaseEntity {
   @Column({ unique: true, nullable: false, length: 50 })
   username: string;
 
-  @Column({ nullable: false, length: 100 })
+  @Column({ nullable: true, length: 100 })
   password: string;
 
   @Column({ nullable: false, default: false })
@@ -62,6 +63,9 @@ export class User extends BaseEntity {
 
   @OneToMany(() => Token, (token) => token.user)
   tokens: Token[];
+
+  @OneToMany(() => Service, (service) => service.user)
+  services: Service[];
 
   @OneToMany(() => AuditLog, (auditLog) => auditLog.user)
   auditLogs: Promise<AuditLog[]>;

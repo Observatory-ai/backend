@@ -12,12 +12,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       clientID: configService.get<GoogleConfig>('google').authClientId,
       clientSecret: configService.get<GoogleConfig>('google').authClientSecret,
       callbackURL: 'http://localhost:3000/api/auth/google/callback',
-      scope: [
-        'email',
-        'profile',
-        'https://www.googleapis.com/auth/user.birthday.read',
-        'https://www.googleapis.com/auth/user.gender.read',
-      ],
+      scope: ['email', 'profile'],
     });
   }
   async validate(
