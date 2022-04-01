@@ -23,6 +23,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { AuditModule } from './audit/audit.module';
 import { GoogleAuthModule } from './google-auth/google-auth.module';
 import { ServiceIntegrationModule } from './service-integration/service-integration.module';
+import { GoogleCalendarModule } from './google-calendar/google-calendar.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -113,6 +114,7 @@ import { ServiceIntegrationModule } from './service-integration/service-integrat
     AuditModule,
     GoogleAuthModule,
     ServiceIntegrationModule,
+    GoogleCalendarModule,
   ],
 })
 export class AppModule {

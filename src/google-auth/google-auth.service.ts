@@ -9,7 +9,7 @@ import { Locale } from '../user/enum/locale.enum';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { ConfigService } from '@nestjs/config';
 import { Config, GoogleConfig } from '../config/configuration.interface';
-import { Auth, google, people_v1 } from 'googleapis';
+import { Auth, google } from 'googleapis';
 
 @Injectable()
 export class GoogleAuthService {
@@ -44,9 +44,12 @@ export class GoogleAuthService {
       googleUser.profile._json.email,
     );
     if (user) {
+      if (user.authMethod == AuthMethod.Local) {
+        // update missing field provided by google (firstName, lastName, avatar(if not set), authMethod, locale, googleId)
+      }
       return await this.authService.logIn(user, response);
     } else {
-      await this.setGoogleClientAccessToken(googleUser.accessToken);
+      //   await this.setGoogleClientAccessToken(googleUser.accessToken);
       const locale = googleUser.profile._json.locale.replace(/-/g, '_');
       let createUserDto: CreateUserDto = {
         email: googleUser.profile._json.email,

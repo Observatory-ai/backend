@@ -287,21 +287,12 @@ export class AuthService {
         AuthTokenType.Access,
       );
       if (!accessToken) throw new UnauthorizedException();
-      try {
-        accessToken = accessToken || '';
-        const decodedAccessToken: TokenPayload = this.validateCookieToken(
-          accessToken,
-          AuthTokenType.Access,
-        );
-        if (!decodedAccessToken) throw new UnauthorizedException();
-        const user: User = await this.userService.findByEmailOrUsername(
-          decodedAccessToken.email,
-        );
-        request.user = user;
-        return;
-      } catch (err) {
-        // Catch TokenExpiredError, do nothing if this is not being used by the websocket proxy
-      }
+      accessToken = accessToken || '';
+      const decodedAccessToken: TokenPayload = this.validateCookieToken(
+        accessToken,
+        AuthTokenType.Access,
+      );
+      if (!decodedAccessToken) throw new UnauthorizedException();
 
       // Check the refresh token
       const refreshToken: string = AuthService.getTokenFromRequest(
@@ -321,12 +312,16 @@ export class AuthService {
         refreshToken,
       );
 
+      if (!user || !user.refreshToken) throw new UnauthorizedException();
+
       // Generate and set the new access token (in the response)
       const newAccessToken: string = await this.generateAndSetCookie(
         user,
         response,
         AuthTokenType.Access,
       );
+
+      request.user = user;
       // Set the new access token in the current request
       request.cookies[this.accessCookieConfig.name] = newAccessToken;
     } catch (err) {

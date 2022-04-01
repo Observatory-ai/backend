@@ -65,8 +65,8 @@ export class AuthController {
     let createUserDto: CreateUserDto = {
       email: signUpDto.email,
       username: signUpDto.username,
-      firstName: null,
-      lastName: null,
+      firstName: null, // to add
+      lastName: null, // to add
       avatar: null,
       password: signUpDto.password,
       uuid: null,
