@@ -5,6 +5,7 @@ import { ServiceRepository } from './service.repository';
 
 @Module({
   imports: [TypeOrmModule.forFeature([ServiceRepository])],
+  exports: [ServiceIntegrationService],
   providers: [ServiceIntegrationService],
 })
 export class ServiceIntegrationModule {}

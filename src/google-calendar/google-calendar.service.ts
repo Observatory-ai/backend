@@ -1,21 +1,34 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UserResponseDto } from '../auth/dtos/responses/user-response.dto';
 import { User } from '../user/user.entity';
 import { Request as ExpressRequest } from 'express';
 import { Auth, google } from 'googleapis';
 import { ConfigService } from '@nestjs/config';
 import { Config, GoogleConfig } from '../config/configuration.interface';
+import { CreateServiceDto } from '../service-integration/dto/create-service.dto';
+import { ServiceType } from '../service-integration/enum/service-type.enum';
+import { Api } from '../service-integration/enum/api.enum';
+import { ServiceIntegrationService } from '../service-integration/service-integration.service';
+import { plainToClass } from 'class-transformer';
+const url = require('url');
 
 @Injectable()
 export class GoogleCalendarService {
   oauthClient: Auth.OAuth2Client;
-  constructor(private readonly configService: ConfigService<Config>) {
+  constructor(
+    private readonly configService: ConfigService<Config>,
+    private readonly serviceIntegrationService: ServiceIntegrationService,
+  ) {
     const clientID =
       this.configService.get<GoogleConfig>('google').authClientId;
     const clientSecret =
       this.configService.get<GoogleConfig>('google').authClientSecret;
 
-    this.oauthClient = new google.auth.OAuth2(clientID, clientSecret);
+    this.oauthClient = new google.auth.OAuth2(
+      clientID,
+      clientSecret,
+      'http://localhost:3000/api/google-calendar/activate/callback',
+    );
   }
 
   /**
@@ -25,22 +38,12 @@ export class GoogleCalendarService {
    * @returns the response object for authentication
    */
   async requestService(user: User, request: ExpressRequest): Promise<void> {
-    console.log(user);
     // check if user is authenticated with google
     // if not get user google info
-    // check if there is a refresh token
-    // if not ask for authorization
-    // if there is a refresh token get access token and prepare for requests
     const authorizationUrl = this.oauthClient.generateAuthUrl({
-      // 'online' (default) or 'offline' (gets refresh_token)
       access_type: 'offline',
       login_hint: user.email,
-      scope: [
-        'email',
-        'profile',
-        'https://www.googleapis.com/auth/userinfo.profile',
-        'https://www.googleapis.com/auth/calendar.events.readonly',
-      ],
+      scope: ['https://www.googleapis.com/auth/calendar.events.readonly'],
       include_granted_scopes: true,
       redirect_uri:
         'http://localhost:3000/api/google-calendar/activate/callback',
@@ -56,19 +59,66 @@ export class GoogleCalendarService {
    */
   async activateService(
     request: ExpressRequest,
-    user: any,
-  ): Promise<UserResponseDto | void> {
-    console.log(user);
-    return;
+    user: User,
+  ): Promise<UserResponseDto> {
+    let query = url.parse(request.url, true).query;
+    if (query.error) throw new UnauthorizedException();
+
+    let { tokens } = await this.oauthClient.getToken(query.code);
+    this.setGoogleClientTokens(tokens.refresh_token, tokens.access_token);
+
+    // check if service already exists
+    // if already exists update refresh token adn APIs list
+    // if not do following:
+    const service: CreateServiceDto = {
+      service: ServiceType.google,
+      refreshToken: tokens.refresh_token,
+      userId: user.id,
+      apis: [Api.Google_Calendar],
+      isActive: true,
+    };
+
+    this.serviceIntegrationService.create(service);
+    const userResponseDto = plainToClass(UserResponseDto, user);
+    return userResponseDto;
+  }
+
+  async getCalendarEvents(user: User): Promise<any> {
+    const { refreshToken } =
+      await this.serviceIntegrationService.getServiceRefreshToken(
+        user.id,
+        ServiceType.google,
+      );
+    this.oauthClient.setCredentials({
+      refresh_token: refreshToken,
+    });
+    const events = await this.getUserCalendarEvents();
+    return events;
   }
 
   /**
    * Set access token for google client
    * @param accessToken the user's access token
    */
-  async setGoogleClientAccessToken(accessToken: string): Promise<void> {
+  async setGoogleClientTokens(
+    refreshToken: string,
+    accessToken?: string,
+  ): Promise<void> {
     await this.oauthClient.setCredentials({
       access_token: accessToken,
+      refresh_token: refreshToken,
     });
+  }
+
+  /**
+   * Get the user google calendar events on main calendar
+   * @param accessToken the user's access token
+   */
+  async getUserCalendarEvents(): Promise<any> {
+    const service = google.calendar({ version: 'v3', auth: this.oauthClient });
+    const res = await service.events.list({
+      calendarId: 'primary',
+    });
+    return res.data;
   }
 }

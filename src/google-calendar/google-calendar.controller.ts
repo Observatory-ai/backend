@@ -22,10 +22,17 @@ export class GoogleCalendarController {
   }
 
   @Get('activate/callback')
+  @UseGuards(JwtAuthenticationGuard)
   googleCalendarRedirect(
     @Request() request: ExpressRequest,
-    @ReqUser() user: any,
-  ): Promise<UserResponseDto | void> {
+    @ReqUser() user: User,
+  ): Promise<UserResponseDto> {
     return this.googleCalendarService.activateService(request, user);
+  }
+
+  @Get('events')
+  @UseGuards(JwtAuthenticationGuard)
+  getCalendarEvents(@ReqUser() user: any): Promise<any> {
+    return this.googleCalendarService.getCalendarEvents(user);
   }
 }

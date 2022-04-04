@@ -1,6 +1,7 @@
 import { EntityRepository, Repository } from 'typeorm';
 import { Service } from './service.entity';
 import { CreateServiceDto } from './dto/create-service.dto';
+import { ServiceType } from './enum/service-type.enum';
 
 @EntityRepository(Service)
 export class ServiceRepository extends Repository<Service> {
@@ -19,5 +20,14 @@ export class ServiceRepository extends Repository<Service> {
       // TODO: throw error
       return undefined;
     }
+  }
+
+  async findByUserIdAndServiceType(
+    userId: number,
+    serviceType: ServiceType,
+  ): Promise<Service | undefined> {
+    return await this.findOne({
+      where: { userId: userId, service: serviceType },
+    });
   }
 }

@@ -230,6 +230,7 @@ export class AuthService {
     const user: User = await this.userService.findByEmailOrUsername(
       emailOrUsername,
     );
+    if (!user.password) throw new InvalidCredentialsException();
     const passwordsMatch = await this.passwordsMatch(password, user.password);
     if (!passwordsMatch) throw new InvalidCredentialsException();
     return user;
