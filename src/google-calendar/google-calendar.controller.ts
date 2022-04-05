@@ -8,7 +8,7 @@ import { UserResponseDto } from '../auth/dtos/responses/user-response.dto';
 import { JwtAuthenticationGuard } from '../auth/guards/jwt-authentication.guard';
 
 @Controller('api/google-calendar')
-@ApiTags('Google Authentication')
+@ApiTags('Google Calendar')
 export class GoogleCalendarController {
   constructor(private readonly googleCalendarService: GoogleCalendarService) {}
 

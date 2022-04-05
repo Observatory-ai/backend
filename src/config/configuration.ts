@@ -8,6 +8,7 @@ export default () => ({
   logLevel: process.env.LOG_LEVEL.split(','),
   domain: process.env.DOMAIN,
   database: {
+    databaseName: process.env.DATABASE_NAME,
     databaseUri: process.env.DATABASE_URI,
     databasePort: process.env.DATABASE_PORT,
     databaseUsername: process.env.DATABASE_USERNAME,

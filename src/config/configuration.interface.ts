@@ -28,6 +28,7 @@ interface DatabaseConfig {
   databasePort: number;
   databaseUsername: string;
   databasePassword: string;
+  databaseName: string;
 }
 
 /**

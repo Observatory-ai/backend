@@ -10,6 +10,7 @@ import { ServiceType } from '../service-integration/enum/service-type.enum';
 import { Api } from '../service-integration/enum/api.enum';
 import { ServiceIntegrationService } from '../service-integration/service-integration.service';
 import { plainToClass } from 'class-transformer';
+import { Service } from 'src/service-integration/service.entity';
 const url = require('url');
 
 @Injectable()
@@ -67,28 +68,53 @@ export class GoogleCalendarService {
     let { tokens } = await this.oauthClient.getToken(query.code);
     this.setGoogleClientTokens(tokens.refresh_token, tokens.access_token);
 
-    // check if service already exists
-    // if already exists update refresh token adn APIs list
-    // if not do following:
-    const service: CreateServiceDto = {
-      service: ServiceType.google,
-      refreshToken: tokens.refresh_token,
-      userId: user.id,
-      apis: [Api.Google_Calendar],
-      isActive: true,
-    };
+    if (
+      await this.serviceIntegrationService.doesExists(
+        ServiceType.google,
+        user.id,
+      )
+    ) {
+      if (!!tokens.refresh_token) {
+        let { apis } = await this.serviceIntegrationService.getService(
+          ServiceType.google,
+          user.id,
+        );
+        if (apis.includes(Api.Google_Calendar)) {
+          await this.serviceIntegrationService.updateRefreshToken(
+            ServiceType.google,
+            user.id,
+            tokens.refresh_token,
+          );
+        } else {
+          apis.push(Api.Google_Calendar);
+          await this.serviceIntegrationService.updateRefreshTokenAndApis(
+            ServiceType.google,
+            user.id,
+            tokens.refresh_token,
+            apis,
+          );
+        }
+      }
+    } else {
+      const service: CreateServiceDto = {
+        service: ServiceType.google,
+        refreshToken: tokens.refresh_token,
+        userId: user.id,
+        apis: [Api.Google_Calendar],
+        isActive: true,
+      };
 
-    this.serviceIntegrationService.create(service);
+      this.serviceIntegrationService.create(service);
+    }
     const userResponseDto = plainToClass(UserResponseDto, user);
     return userResponseDto;
   }
 
   async getCalendarEvents(user: User): Promise<any> {
-    const { refreshToken } =
-      await this.serviceIntegrationService.getServiceRefreshToken(
-        user.id,
-        ServiceType.google,
-      );
+    const { refreshToken } = await this.serviceIntegrationService.getService(
+      user.id,
+      ServiceType.google,
+    );
     this.oauthClient.setCredentials({
       refresh_token: refreshToken,
     });

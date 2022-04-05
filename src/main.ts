@@ -41,7 +41,7 @@ async function bootstrap() {
       OpenAPIObject,
       'openapi' | 'info' | 'servers' | 'security' | 'tags' | 'externalDocs'
     > = new DocumentBuilder()
-      .setTitle('Observatory Auth Server API')
+      .setTitle('Observatory API')
       .setDescription('The Auth API for Observatory')
       .setVersion(`v${version}`)
       .addCookieAuth(COOKIE_CONFIG[AuthTokenType.Access].name)

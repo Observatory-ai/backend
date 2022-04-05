@@ -30,4 +30,32 @@ export class ServiceRepository extends Repository<Service> {
       where: { userId: userId, service: serviceType },
     });
   }
+
+  async updateRefreshToken(serviceType, userId, refreshToken): Promise<void> {
+    const result = await this.createQueryBuilder()
+      .update(Service)
+      .set({
+        refreshToken,
+      })
+      .where('userId = :userId', { userId })
+      .andWhere('service = :serviceType', { serviceType })
+      .execute();
+  }
+
+  async updateRefreshTokenAndApis(
+    serviceType,
+    userId,
+    refreshToken,
+    apis,
+  ): Promise<void> {
+    const result = await this.createQueryBuilder()
+      .update(Service)
+      .set({
+        refreshToken,
+        apis,
+      })
+      .where('userId = :userId', { userId })
+      .andWhere('service = :serviceType', { serviceType })
+      .execute();
+  }
 }
