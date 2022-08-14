@@ -1,16 +1,12 @@
-import { MiddlewareConsumer, Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from './auth/auth.module';
-import { UserModule } from './user/user.module';
-import { MailModule } from './mail/mail.module';
-import { TokenModule } from './token/token.module';
-import { LoggerModule } from './logger/logger.module';
-import { ScheduleModule } from '@nestjs/schedule';
-import { LoggerMiddleware } from './middlewares/logger.middleware';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import configuration from './config/configuration';
+import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-const Joi = require('joi');
+import { MiddlewareConsumer, Module } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuditModule } from './audit/audit.module';
+import { AuthModule } from './auth/auth.module';
+import configuration from './config/configuration';
 import {
   Config,
   DatabaseConfig,
@@ -18,12 +14,16 @@ import {
   LogLevel,
   SmtpConfig,
 } from './config/configuration.interface';
-import { commaDelimitedLogLevel } from './utils/regex.patterns';
-import { MailerModule } from '@nestjs-modules/mailer';
-import { AuditModule } from './audit/audit.module';
 import { GoogleAuthModule } from './google-auth/google-auth.module';
-import { ServiceIntegrationModule } from './service-integration/service-integration.module';
 import { GoogleCalendarModule } from './google-calendar/google-calendar.module';
+import { LoggerModule } from './logger/logger.module';
+import { MailModule } from './mail/mail.module';
+import { LoggerMiddleware } from './middlewares/logger.middleware';
+import { ServiceIntegrationModule } from './service-integration/service-integration.module';
+import { TokenModule } from './token/token.module';
+import { UserModule } from './user/user.module';
+import { commaDelimitedLogLevel } from './utils/regex.patterns';
+const Joi = require('joi');
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -45,11 +45,7 @@ import { GoogleCalendarModule } from './google-calendar/google-calendar.module';
             is: EnvironmentConfig.Development,
             then: Joi.allow('localhost'),
           }),
-        DATABASE_NAME: Joi.string().required(),
-        DATABASE_URI: Joi.string().required(),
-        DATABASE_PORT: Joi.number().required(),
-        DATABASE_USERNAME: Joi.string().required(),
-        DATABASE_PASSWORD: Joi.string().required(),
+        DATABASE_URL: Joi.string().required(),
         JWT_ACCESS_SECRET: Joi.string().required(),
         JWT_REFRESH_SECRET: Joi.string().required(),
         SMTP_HOST: Joi.string().required(),
@@ -93,13 +89,10 @@ import { GoogleCalendarModule } from './google-calendar/google-calendar.module';
       useFactory: async (configService: ConfigService<Config>) => {
         const databaseConfig: DatabaseConfig =
           configService.get<DatabaseConfig>('database');
+        console.log(databaseConfig.databaseUrl);
         return {
           type: 'postgres',
-          host: databaseConfig.databaseUri,
-          port: databaseConfig.databasePort,
-          username: databaseConfig.databaseUsername,
-          password: databaseConfig.databasePassword,
-          database: databaseConfig.databaseName,
+          url: databaseConfig.databaseUrl,
           entities: [__dirname + '/**/*.entity{.ts,.js}'],
           synchronize: true,
           logging: true,

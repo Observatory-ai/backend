@@ -2,8 +2,42 @@
 
 ## Installation
 
+1. Install the Hasura CLI:
+   [Hasura CLI Installation](https://hasura.io/docs/latest/hasura-cli/install-hasura-cli/)
+
+2. Run the following commands:
+
 ```bash
-$ yarn install
+docker compose up -d
+yarn install or yarn
+```
+
+3. Start the Hasura Client:
+
+```bash
+hasura console
+```
+
+## Hasura usage
+
+### Connecting to the observatory database in Hasura
+
+![hasura databse connection](https://drive.google.com/uc?id=1b9AEGIfOmNrzf0iZqwMi_YpY9Ll-eCDq)
+
+### Hasura commands
+
+NOTE: THE FOLLOWING COMMANDS SHOULD NOT BE USED. DATABASE MODIFICATIONS ARE MANAGED BY THE API
+
+- Add a migration
+
+```bash
+hasura migrate create "migration-name" --from-server --database-name observatory
+```
+
+- Apply migrations
+
+```bash
+hasura migrate apply --database-name JoistAnalyzer
 ```
 
 ## Example .env file
@@ -16,10 +50,7 @@ LOG_LEVEL=log,warn,error
 # Domain
 DOMAIN=localhost
 # Database
-DATABASE_URI=
-DATABASE_PORT=
-DATABASE_USERNAME=
-DATABASE_PASSWORD=
+DATABASE_URL=postgres://postgres:postgrespassword@localhost:5432/postgres
 # JWT
 JWT_ACCESS_SECRET=
 JWT_REFRESH_SECRET=
