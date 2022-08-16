@@ -1,6 +1,6 @@
 table:
+  name: service
   schema: public
-  name: audit_log
 object_relationships:
   - name: user
     using:

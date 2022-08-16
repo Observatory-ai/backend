@@ -1,6 +1,6 @@
 table:
+  name: token
   schema: public
-  name: service
 object_relationships:
   - name: user
     using:

@@ -11,7 +11,7 @@ services:
     environment:
       POSTGRES_PASSWORD: postgrespassword
   graphql-engine:
-    image: hasura/graphql-engine:v2.8.4
+    image: hasura/graphql-engine:v2.10.0
     ports:
       - '8080:8080'
     depends_on:
@@ -27,8 +27,7 @@ services:
       ## enable debugging mode. It is recommended to disable this in production
       HASURA_GRAPHQL_DEV_MODE: 'true'
       HASURA_GRAPHQL_ENABLED_LOG_TYPES: startup, http-log, webhook-log, websocket-log, query-log
-      ## uncomment next line to set an admin secret
-      # HASURA_GRAPHQL_ADMIN_SECRET: myadminsecretkey
+      HASURA_GRAPHQL_ADMIN_SECRET: admin
       HASURA_GRAPHQL_EXPERIMENTAL_FEATURES: 'streaming_subscriptions'
 volumes:
   db_data:

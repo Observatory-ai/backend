@@ -1,25 +1,25 @@
 table:
-  schema: public
   name: user
+  schema: public
 array_relationships:
   - name: audit_logs
     using:
       foreign_key_constraint_on:
         column: userId
         table:
-          schema: public
           name: audit_log
+          schema: public
   - name: services
     using:
       foreign_key_constraint_on:
         column: userId
         table:
-          schema: public
           name: service
+          schema: public
   - name: tokens
     using:
       foreign_key_constraint_on:
         column: userId
         table:
-          schema: public
           name: token
+          schema: public
