@@ -10,6 +10,8 @@ import { CreateUserDto } from '../user/dto/create-user.dto';
 import { ConfigService } from '@nestjs/config';
 import { Config, GoogleConfig } from '../config/configuration.interface';
 import { Auth, google } from 'googleapis';
+import { plainToClass } from 'class-transformer';
+import { User } from '../user/user.entity';
 
 @Injectable()
 export class GoogleAuthService {
@@ -64,7 +66,9 @@ export class GoogleAuthService {
         authMethod: AuthMethod[googleUser.profile.provider],
         locale: Locale[locale],
       };
-      return await this.authService.register(createUserDto);
+      const createdUser = plainToClass(User, createUserDto);
+      await this.authService.register(createUserDto);
+      return await this.authService.logIn(createdUser, response);
     }
   }
 

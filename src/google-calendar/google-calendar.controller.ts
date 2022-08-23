@@ -1,5 +1,5 @@
 import { Controller, Get, Request, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
 import { GoogleCalendarService } from './google-calendar.service';
 import { Request as ExpressRequest } from 'express';
 import { ReqUser } from '../decorators/user.decorator';
@@ -32,6 +32,7 @@ export class GoogleCalendarController {
 
   @Get('events')
   @UseGuards(JwtAuthenticationGuard)
+  @ApiCookieAuth()
   getCalendarEvents(@ReqUser() user: any): Promise<any> {
     return this.googleCalendarService.getCalendarEvents(user);
   }

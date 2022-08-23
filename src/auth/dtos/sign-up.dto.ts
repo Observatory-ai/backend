@@ -29,6 +29,18 @@ export class SignUpDto {
 
   @ApiProperty()
   @IsNotEmpty({
+    message: 'First name can not be empty',
+  })
+  firstName: string;
+
+  @ApiProperty()
+  @IsNotEmpty({
+    message: 'Last name can not be empty',
+  })
+  lastName: string;
+
+  @ApiProperty()
+  @IsNotEmpty({
     message: 'Username can not be empty',
   })
   @MinLength(3, {
@@ -63,12 +75,4 @@ export class SignUpDto {
     message: 'Passwords do not match',
   })
   confirmPassword: string;
-
-  @ApiProperty()
-  @IsNotEmpty({
-    message: 'Birthday can not be empty',
-  })
-  @IsDate({ message: 'Invalid birthday' })
-  @Type(() => Date)
-  birthday: Date;
 }
