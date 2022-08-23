@@ -24,11 +24,7 @@ interface AppConfig {
  * The server database credentials configuration
  */
 interface DatabaseConfig {
-  databaseUri: string;
-  databasePort: number;
-  databaseUsername: string;
-  databasePassword: string;
-  databaseName: string;
+  databaseUrl: string;
 }
 
 /**

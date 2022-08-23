@@ -1,0 +1,3 @@
+table:
+  name: typeorm_metadata
+  schema: public

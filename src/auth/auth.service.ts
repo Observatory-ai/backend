@@ -1,39 +1,39 @@
-import { TokenPayload } from './interfaces/token-payload.interface';
-import { ConfigService } from '@nestjs/config';
 import {
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import {
-  CookieConfig,
-  AuthTokenType,
-  COOKIE_CONFIG,
-} from './configs/cookie.config';
+import { plainToClass } from 'class-transformer';
 import { CookieOptions, Request, Response } from 'express';
-import { DateUtil } from '../utils/date.util';
-import { Token } from '../token/token.entity';
-import { TokenType } from '../token/enum/token-type.enum';
-import { User } from '../user/user.entity';
-import { MailService } from '../mail/mail.service';
-import { UserTokenDto } from '../mail/dto/user-token.dto';
-import { PasswordChangedDto } from '../mail/dto/password-changed.dto';
-import { TokenService } from '../token/token.service';
-import { CreateTokenDto } from '../token/dto/create-token.dto';
 import { v4 } from 'uuid';
-import { UserService } from '../user/user.service';
-import { CreateUserDto } from '../user/dto/create-user.dto';
-import { RequestWithUser } from '../utils/requests.interface';
 import { Config, JwtConfig } from '../config/configuration.interface';
 import { InvalidCredentialsException } from '../exception/invalid-credentials.exception';
-import { ForgotPasswordDto } from './dtos/forgot-password.dto';
-import { ChangePasswordDto } from './dtos/change-password.dto';
-import { VerifyAccountDto } from './dtos/verify-account.dto';
-import { UserResponseDto } from './dtos/responses/user-response.dto';
-import { plainToClass } from 'class-transformer';
 import { SamePasswordException } from '../exception/same-password.exception';
+import { PasswordChangedDto } from '../mail/dto/password-changed.dto';
+import { UserTokenDto } from '../mail/dto/user-token.dto';
+import { MailService } from '../mail/mail.service';
+import { CreateTokenDto } from '../token/dto/create-token.dto';
+import { TokenType } from '../token/enum/token-type.enum';
+import { Token } from '../token/token.entity';
+import { TokenService } from '../token/token.service';
+import { CreateUserDto } from '../user/dto/create-user.dto';
+import { User } from '../user/user.entity';
+import { UserService } from '../user/user.service';
+import { DateUtil } from '../utils/date.util';
+import { RequestWithUser } from '../utils/requests.interface';
+import {
+  AuthTokenType,
+  CookieConfig,
+  COOKIE_CONFIG,
+} from './configs/cookie.config';
+import { ChangePasswordDto } from './dtos/change-password.dto';
+import { ForgotPasswordDto } from './dtos/forgot-password.dto';
+import { UserResponseDto } from './dtos/responses/user-response.dto';
+import { VerifyAccountDto } from './dtos/verify-account.dto';
+import { TokenPayload } from './interfaces/token-payload.interface';
 
 @Injectable()
 export class AuthService {
