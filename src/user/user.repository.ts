@@ -1,10 +1,10 @@
-import { EntityRepository, Repository } from 'typeorm';
-import { User } from './user.entity';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { BadRequestException } from '@nestjs/common';
-import { EmailInUseException } from 'src/exception/email-in-use.exception';
-import { UsernameInUseException } from 'src/exception/username-in-use.exception';
+import { BadRequestException } from "@nestjs/common";
+import { EmailInUseException } from "src/exception/email-in-use.exception";
+import { UsernameInUseException } from "src/exception/username-in-use.exception";
+import { EntityRepository, Repository } from "typeorm";
+import { CreateUserDto } from "./dto/create-user.dto";
+import { UpdateUserDto } from "./dto/update-user.dto";
+import { User } from "./user.entity";
 
 @EntityRepository(User)
 export class UserRepository extends Repository<User> {
@@ -20,7 +20,7 @@ export class UserRepository extends Repository<User> {
     usernameOrEmail: string,
   ): Promise<User | undefined> {
     return await this.findOne(
-      usernameOrEmail.includes('@')
+      usernameOrEmail.includes("@")
         ? { where: { email: usernameOrEmail } }
         : { where: { username: usernameOrEmail } },
     );
@@ -57,10 +57,10 @@ export class UserRepository extends Repository<User> {
     try {
       return await this.save(user);
     } catch (err) {
-      if (err.code === '23505') {
-        if (err.detail.includes('(email)=')) {
+      if (err.code === "23505") {
+        if (err.detail.includes("(email)=")) {
           throw new EmailInUseException();
-        } else if (err.detail.includes('(username)=')) {
+        } else if (err.detail.includes("(username)=")) {
           throw new UsernameInUseException();
         } else {
           // uuid duplication (highly improbable)
@@ -79,26 +79,10 @@ export class UserRepository extends Repository<User> {
       .set({
         ...updateUserDto,
       })
-      .where('uuid = :uuid', { uuid: userId })
-      .returning('*')
+      .where("uuid = :uuid", { uuid: userId })
+      .returning("*")
       .execute();
 
-    return result.raw[0];
-  }
-
-  async updateRefreshToken(
-    emailOrUsername: string,
-    refreshToken: string,
-  ): Promise<User> {
-    const result = await this.createQueryBuilder()
-      .update(User)
-      .set({
-        refreshToken,
-      })
-      .where('email = :emailOrUsername', { emailOrUsername })
-      .orWhere('username = :emailOrUsername', { emailOrUsername })
-      .returning('*')
-      .execute();
     return result.raw[0];
   }
 
@@ -108,7 +92,7 @@ export class UserRepository extends Repository<User> {
       .set({
         password,
       })
-      .where('id = :id', { id: userId })
+      .where("id = :id", { id: userId })
       .execute();
   }
 
@@ -118,7 +102,7 @@ export class UserRepository extends Repository<User> {
       .set({
         isVerified: true,
       })
-      .where('id = :id', { id: userId })
+      .where("id = :id", { id: userId })
       .execute();
   }
 
@@ -130,15 +114,5 @@ export class UserRepository extends Repository<User> {
       .execute();
 
     return result.affected;
-  }
-
-  async clearRefreshToken(email: string): Promise<void> {
-    await this.createQueryBuilder()
-      .update(User)
-      .set({
-        refreshToken: null,
-      })
-      .where('email = :email', { email })
-      .execute();
   }
 }

@@ -1,25 +1,23 @@
-import { Injectable, Logger } from '@nestjs/common';
-import * as bcrypt from 'bcryptjs';
-import { Cron, CronExpression } from '@nestjs/schedule';
-import { TokenService } from '../token/token.service';
-import { DateUtil } from '../utils/date.util';
-import { InjectRepository } from '@nestjs/typeorm';
-import { UserRepository } from './user.repository';
-import { CreateUserDto } from './dto/create-user.dto';
-import { Token } from '../token/token.entity';
-import { TokenType } from '../token/enum/token-type.enum';
-import { User } from './user.entity';
+import { Injectable, Logger } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import * as bcrypt from "bcryptjs";
+import { v4 } from "uuid";
+import { AccountDisabledException } from "../exception/account-disabled.exception";
 import {
   UserNotFoundException,
   UserWithIdNotFoundException,
-} from '../exception/user-not-found.exception';
-import { AccountDisabledException } from '../exception/account-disabled.exception';
-import { AccountNotVerifiedException } from '../exception/account-not-verified.exception';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { UserTokenDto } from '../mail/dto/user-token.dto';
-import { MailService } from '../mail/mail.service';
-import { CreateTokenDto } from '../token/dto/create-token.dto';
-import { v4 } from 'uuid';
+} from "../exception/user-not-found.exception";
+import { UserTokenDto } from "../mail/dto/user-token.dto";
+import { MailService } from "../mail/mail.service";
+import { CreateTokenDto } from "../token/dto/create-token.dto";
+import { TokenType } from "../token/enum/token-type.enum";
+import { Token } from "../token/token.entity";
+import { TokenService } from "../token/token.service";
+import { DateUtil } from "../utils/date.util";
+import { CreateUserDto } from "./dto/create-user.dto";
+import { UpdateUserDto } from "./dto/update-user.dto";
+import { User } from "./user.entity";
+import { UserRepository } from "./user.repository";
 
 @Injectable()
 export class UserService {
@@ -115,25 +113,6 @@ export class UserService {
   }
 
   /**
-   * Find a user by email and refresh token
-   * @param email the users email
-   * @param refreshToken the users latest refresh token
-   * @returns a user
-   */
-  async findByEmailAndRefreshToken(
-    email: string,
-    refreshToken: string,
-  ): Promise<User> {
-    const user: User = await this.findByEmailOrUsername(email);
-    if (!user.refreshToken) return;
-    const refreshTokensMatch: boolean = await bcrypt.compare(
-      refreshToken,
-      user.refreshToken,
-    );
-    if (refreshTokensMatch) return user;
-  }
-
-  /**
    * Checks whether a user exists or not
    * @param userUuid the user's uuid or the user's email
    * @throws UserWithIdNotFoundException
@@ -164,30 +143,6 @@ export class UserService {
   async remove(userId: string): Promise<void> {
     await this.userRepository.deleteUser(userId);
     this.tokenService.handleUserDeletedEvent(userId);
-  }
-
-  /**
-   * Update a users latest refresh token
-   * @param email the users email
-   * @param refreshToken the users latest refresh token
-   */
-  async updateRefreshToken(
-    emailOrUsername: string,
-    refreshToken: string,
-  ): Promise<void> {
-    const hashedRefreshToken: string = await this.hash(refreshToken);
-    await this.userRepository.updateRefreshToken(
-      emailOrUsername,
-      hashedRefreshToken,
-    );
-  }
-
-  /**
-   * Clear a users refresh token
-   * @param email the users email
-   */
-  async clearRefreshToken(email: string): Promise<void> {
-    await this.userRepository.clearRefreshToken(email);
   }
 
   /**

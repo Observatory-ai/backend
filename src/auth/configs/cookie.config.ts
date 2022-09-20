@@ -1,12 +1,12 @@
-import { CookieOptions } from 'express';
+import { CookieOptions } from "express";
 
 /**
  * Represents the type of authentication token the server sets in
  * the browser using cookies
  */
 enum AuthTokenType {
-  Access = 'ACCESS',
-  Refresh = 'REFRESH',
+  Access = "ACCESS",
+  Refresh = "REFRESH",
 }
 
 /**
@@ -23,22 +23,24 @@ interface CookieConfig {
  */
 const COOKIE_CONFIG: Record<AuthTokenType, CookieConfig> = {
   ACCESS: {
-    name: 'jwt',
+    name: "jwt_access",
     cookieOptions: {
       httpOnly: true,
-      path: '/',
+      path: "/",
     },
-    // 1 day
-    expirationTime: 86400,
+    // 15 minutes
+    expirationTime: 60,
   },
   REFRESH: {
-    name: 'jwt_refresh',
+    name: "jwt",
     cookieOptions: {
       httpOnly: true,
-      path: '/',
+      sameSite: "none",
+      // secure: true,
+      path: "/",
     },
-    // 365 days
-    expirationTime: 31556952,
+    // 1 week
+    expirationTime: 604800,
   },
 };
 

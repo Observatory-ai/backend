@@ -1,19 +1,20 @@
 import {
-  Entity,
+  BaseEntity,
   Column,
-  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
   Index,
   OneToMany,
-  CreateDateColumn,
+  PrimaryGeneratedColumn,
   UpdateDateColumn,
-  DeleteDateColumn,
-  BaseEntity,
-} from 'typeorm';
-import { Token } from '../token/token.entity';
-import { AuditLog } from '../audit/audit-log.entity';
-import { AuthMethod } from './enum/auth-method.enum';
-import { Locale } from './enum/locale.enum';
-import { Service } from '../service-integration/service.entity';
+} from "typeorm";
+import { AuditLog } from "../audit/audit-log.entity";
+import { AuthToken } from "../auth/auth-token.entity";
+import { Service } from "../service-integration/service.entity";
+import { Token } from "../token/token.entity";
+import { AuthMethod } from "./enum/auth-method.enum";
+import { Locale } from "./enum/locale.enum";
 
 @Entity()
 export class User extends BaseEntity {
@@ -21,14 +22,14 @@ export class User extends BaseEntity {
   id: number;
 
   @Index({ unique: true })
-  @Column({ type: 'uuid', unique: true, nullable: false })
+  @Column({ type: "uuid", unique: true, nullable: false })
   uuid: string;
 
   @Column({ unique: true, nullable: true })
   googleId: string;
 
-  @Column({ nullable: true })
-  refreshToken?: string;
+  // @Column({ nullable: true })
+  // refreshToken?: string;
 
   @Index({ unique: true })
   @Column({ unique: true, nullable: false, length: 50 })
@@ -55,14 +56,17 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   lastName: string;
 
-  @Column({ type: 'enum', enum: AuthMethod, nullable: false })
+  @Column({ type: "enum", enum: AuthMethod, nullable: false })
   authMethod: AuthMethod;
 
-  @Column({ type: 'enum', enum: Locale, nullable: true })
+  @Column({ type: "enum", enum: Locale, nullable: true })
   locale: Locale;
 
   @OneToMany(() => Token, (token) => token.user)
   tokens: Token[];
+
+  @OneToMany(() => AuthToken, (authToken) => authToken.user)
+  authTokens: AuthToken[];
 
   @OneToMany(() => Service, (service) => service.user)
   services: Service[];

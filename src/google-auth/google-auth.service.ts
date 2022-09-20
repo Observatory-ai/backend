@@ -1,17 +1,17 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { GoogleUserDto } from './dtos/google-user.dto';
-import { Response } from 'express';
-import { AuthService } from '../auth/auth.service';
-import { UserService } from '../user/user.service';
-import { UserResponseDto } from '../auth/dtos/responses/user-response.dto';
-import { AuthMethod } from '../user/enum/auth-method.enum';
-import { Locale } from '../user/enum/locale.enum';
-import { CreateUserDto } from '../user/dto/create-user.dto';
-import { ConfigService } from '@nestjs/config';
-import { Config, GoogleConfig } from '../config/configuration.interface';
-import { Auth, google } from 'googleapis';
-import { plainToClass } from 'class-transformer';
-import { User } from '../user/user.entity';
+import { Injectable, UnauthorizedException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { plainToClass } from "class-transformer";
+import { Request as ExpressRequest } from "express";
+import { Auth, google } from "googleapis";
+import { AuthService } from "../auth/auth.service";
+import { UserResponseDto } from "../auth/dtos/responses/user-response.dto";
+import { Config, GoogleConfig } from "../config/configuration.interface";
+import { CreateUserDto } from "../user/dto/create-user.dto";
+import { AuthMethod } from "../user/enum/auth-method.enum";
+import { Locale } from "../user/enum/locale.enum";
+import { User } from "../user/user.entity";
+import { UserService } from "../user/user.service";
+import { GoogleUserDto } from "./dtos/google-user.dto";
 
 @Injectable()
 export class GoogleAuthService {
@@ -22,9 +22,9 @@ export class GoogleAuthService {
     private readonly configService: ConfigService<Config>,
   ) {
     const clientID =
-      this.configService.get<GoogleConfig>('google').authClientId;
+      this.configService.get<GoogleConfig>("google").authClientId;
     const clientSecret =
-      this.configService.get<GoogleConfig>('google').authClientSecret;
+      this.configService.get<GoogleConfig>("google").authClientSecret;
 
     this.oauthClient = new google.auth.OAuth2(clientID, clientSecret);
   }
@@ -37,7 +37,7 @@ export class GoogleAuthService {
    */
   async authenticate(
     googleUser: GoogleUserDto,
-    response: Response,
+    request: ExpressRequest,
   ): Promise<UserResponseDto> {
     if (!googleUser) {
       throw new UnauthorizedException();
@@ -49,10 +49,10 @@ export class GoogleAuthService {
       if (user.authMethod == AuthMethod.Local) {
         // update missing field provided by google (firstName, lastName, avatar(if not set), authMethod, locale, googleId)
       }
-      return await this.authService.logIn(user, response);
+      return await this.authService.logIn(user, request);
     } else {
       //   await this.setGoogleClientAccessToken(googleUser.accessToken);
-      const locale = googleUser.profile._json.locale.replace(/-/g, '_');
+      const locale = googleUser.profile._json.locale.replace(/-/g, "_");
       let createUserDto: CreateUserDto = {
         email: googleUser.profile._json.email,
         username: googleUser.profile.displayName,
@@ -67,8 +67,8 @@ export class GoogleAuthService {
         locale: Locale[locale],
       };
       const createdUser = plainToClass(User, createUserDto);
-      await this.authService.register(createUserDto);
-      return await this.authService.logIn(createdUser, response);
+      await this.authService.register(request, createUserDto);
+      return await this.authService.logIn(createdUser, request);
     }
   }
 

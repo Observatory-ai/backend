@@ -1,19 +1,18 @@
-import { AuthService } from '../auth.service';
-import { User } from '../../user/user.entity';
-import { UserService } from '../../user/user.service';
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { PassportStrategy } from '@nestjs/passport';
-import { Injectable } from '@nestjs/common';
-import { Request } from 'express';
-import { TokenPayload } from '../interfaces/token-payload.interface';
-import { Config, JwtConfig } from '../../config/configuration.interface';
-import { AuthTokenType } from '../configs/cookie.config';
-import { ConfigService } from '@nestjs/config';
+import { Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { PassportStrategy } from "@nestjs/passport";
+import { Request } from "express";
+import { ExtractJwt, Strategy } from "passport-jwt";
+import { Config, JwtConfig } from "../../config/configuration.interface";
+import { User } from "../../user/user.entity";
+import { UserService } from "../../user/user.service";
+import { AuthService } from "../auth.service";
+import { TokenPayload } from "../interfaces/token-payload.interface";
 
 @Injectable()
 export class JwtRefreshStrategy extends PassportStrategy(
   Strategy,
-  'jwt-refresh',
+  "jwt-refresh",
 ) {
   constructor(
     private readonly configService: ConfigService<Config>,
@@ -22,25 +21,23 @@ export class JwtRefreshStrategy extends PassportStrategy(
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request: Request) => {
-          return AuthService.getTokenFromRequest(
-            request,
-            AuthTokenType.Refresh,
-          );
+          return AuthService.getRefreshTokenFromRequest(request);
         },
       ]),
-      secretOrKey: configService.get<JwtConfig>('jwt').refresh.secret,
+      secretOrKey: configService.get<JwtConfig>("jwt").refresh.secret,
       passReqToCallback: true,
     });
   }
 
   async validate(request: Request, payload: TokenPayload): Promise<User> {
-    const refreshToken: string = AuthService.getTokenFromRequest(
-      request,
-      AuthTokenType.Refresh,
-    );
-    return this.userService.findByEmailAndRefreshToken(
-      payload.email,
-      refreshToken,
-    );
+    const refreshToken: string =
+      AuthService.getRefreshTokenFromRequest(request);
+    // refresh refresh token with token rotation
+    // refresh access token
+    return new User();
+    // return this.userService.findByEmailAndRefreshToken(
+    //   payload.email,
+    //   refreshToken,
+    // );
   }
 }

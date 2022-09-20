@@ -10,34 +10,34 @@
 ```bash
 docker compose up -d
 yarn install or yarn
+yarn start
 ```
 
 3. Start the Hasura Client:
 
 ```bash
-hasura console
+Mac: hasura console
+Windows (npm installation): npx hasura console
 ```
 
-## Hasura usage
-
-### Connecting to the observatory database in Hasura
+4. Connect to the observatory database in Hasura
 
 ![hasura databse connection](https://drive.google.com/uc?id=1b9AEGIfOmNrzf0iZqwMi_YpY9Ll-eCDq)
 
-### Hasura commands
+## Hasura commands
 
-NOTE: THE FOLLOWING COMMANDS SHOULD NOT BE USED. DATABASE MODIFICATIONS ARE MANAGED BY THE API
-
-- Add a migration
+#### Add a migration
 
 ```bash
-hasura migrate create "migration-name" --from-server --database-name observatory
+Mac: hasura migrate create "migration-name" --from-server --database-name observatory
+Windows (npm installation): npx hasura migrate create "migration-name" --from-server --database-name observatory
 ```
 
-- Apply migrations
+#### Apply migrations
 
 ```bash
-hasura migrate apply --database-name JoistAnalyzer
+Mac: hasura migrate apply --database-name observatory
+Windows (npm installation): npx hasura migrate apply --database-name observatory
 ```
 
 ## Example .env file

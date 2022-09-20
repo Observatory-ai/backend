@@ -1,32 +1,31 @@
-import { AuthService } from '../auth.service';
-import { Injectable } from '@nestjs/common';
-import { TokenPayload } from '../interfaces/token-payload.interface';
-import { ConfigService } from '@nestjs/config';
-import { UserService } from '../../user/user.service';
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { PassportStrategy } from '@nestjs/passport';
-import { Request } from 'express';
-import { Config, JwtConfig } from '../../config/configuration.interface';
-import { AuthTokenType } from '../configs/cookie.config';
-import { User } from '../../user/user.entity';
+import { Injectable } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { PassportStrategy } from "@nestjs/passport";
+import { ExtractJwt, Strategy } from "passport-jwt";
+import { RequestWithUserAndAccessToken } from "src/utils/requests.interface";
+import { Config, JwtConfig } from "../../config/configuration.interface";
+import { User } from "../../user/user.entity";
+import { AuthService } from "../auth.service";
+import { TokenPayload } from "../interfaces/token-payload.interface";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly configService: ConfigService<Config>,
-    private readonly userService: UserService,
+    private readonly authService: AuthService,
   ) {
     super({
-      jwtFromRequest: ExtractJwt.fromExtractors([
-        (request: Request) => {
-          return AuthService.getTokenFromRequest(request, AuthTokenType.Access);
-        },
-      ]),
-      secretOrKey: configService.get<JwtConfig>('jwt').access.secret,
+      jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+      ignoreExpiration: false,
+      secretOrKey: configService.get<JwtConfig>("jwt").access.secret,
+      passReqToCallback: true,
     });
   }
 
-  async validate(payload: TokenPayload): Promise<User> {
-    return this.userService.findByEmailOrUsername(payload.email);
+  async validate(
+    request: RequestWithUserAndAccessToken,
+    tokenPayload: TokenPayload,
+  ): Promise<User> {
+    return this.authService.validateJWT(request, tokenPayload);
   }
 }

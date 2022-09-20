@@ -2,38 +2,42 @@ import {
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
-import * as bcrypt from 'bcryptjs';
-import { plainToClass } from 'class-transformer';
-import { CookieOptions, Request, Response } from 'express';
-import { v4 } from 'uuid';
-import { Config, JwtConfig } from '../config/configuration.interface';
-import { InvalidCredentialsException } from '../exception/invalid-credentials.exception';
-import { SamePasswordException } from '../exception/same-password.exception';
-import { PasswordChangedDto } from '../mail/dto/password-changed.dto';
-import { UserTokenDto } from '../mail/dto/user-token.dto';
-import { MailService } from '../mail/mail.service';
-import { CreateTokenDto } from '../token/dto/create-token.dto';
-import { TokenType } from '../token/enum/token-type.enum';
-import { Token } from '../token/token.entity';
-import { TokenService } from '../token/token.service';
-import { CreateUserDto } from '../user/dto/create-user.dto';
-import { User } from '../user/user.entity';
-import { UserService } from '../user/user.service';
-import { DateUtil } from '../utils/date.util';
-import { RequestWithUser } from '../utils/requests.interface';
+} from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
+import { JwtService } from "@nestjs/jwt";
+import { InjectRepository } from "@nestjs/typeorm";
+import * as bcrypt from "bcryptjs";
+import { plainToClass, plainToInstance } from "class-transformer";
+import { Request as ExpressRequest } from "express";
+import { InvalidCredentialsException } from "src/exception/invalid-credentials.exception";
+import { v4 } from "uuid";
+import { Config, JwtConfig } from "../config/configuration.interface";
+import { SamePasswordException } from "../exception/same-password.exception";
+import { PasswordChangedDto } from "../mail/dto/password-changed.dto";
+import { UserTokenDto } from "../mail/dto/user-token.dto";
+import { MailService } from "../mail/mail.service";
+import { CreateTokenDto } from "../token/dto/create-token.dto";
+import { TokenType } from "../token/enum/token-type.enum";
+import { Token } from "../token/token.entity";
+import { TokenService } from "../token/token.service";
+import { CreateUserDto } from "../user/dto/create-user.dto";
+import { User } from "../user/user.entity";
+import { UserService } from "../user/user.service";
+import { DateUtil } from "../utils/date.util";
+import { RequestWithUserAndAccessToken } from "../utils/requests.interface";
+import { AuthTokenRepository } from "./auth-token.repository";
 import {
   AuthTokenType,
   CookieConfig,
   COOKIE_CONFIG,
-} from './configs/cookie.config';
-import { ChangePasswordDto } from './dtos/change-password.dto';
-import { ForgotPasswordDto } from './dtos/forgot-password.dto';
-import { UserResponseDto } from './dtos/responses/user-response.dto';
-import { VerifyAccountDto } from './dtos/verify-account.dto';
-import { TokenPayload } from './interfaces/token-payload.interface';
+} from "./configs/cookie.config";
+import { ChangePasswordDto } from "./dtos/change-password.dto";
+import { CreateAuthTokenDto } from "./dtos/create-auth-token.dto";
+import { ForgotPasswordDto } from "./dtos/forgot-password.dto";
+import { UserResponseDto } from "./dtos/responses/user-response.dto";
+import { UpdateAuthTokenDto } from "./dtos/update-auth-token.dto";
+import { VerifyAccountDto } from "./dtos/verify-account.dto";
+import { TokenPayload } from "./interfaces/token-payload.interface";
 
 @Injectable()
 export class AuthService {
@@ -45,14 +49,40 @@ export class AuthService {
     COOKIE_CONFIG[AuthTokenType.Refresh];
 
   constructor(
+    @InjectRepository(AuthTokenRepository)
+    private readonly authTokenRepository: AuthTokenRepository,
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService<Config>,
     private readonly tokenService: TokenService,
     private readonly mailService: MailService,
   ) {
-    this.jwtConfig = this.configService.get<JwtConfig>('jwt');
-    this.domain = this.configService.get<string>('domain');
+    this.jwtConfig = this.configService.get<JwtConfig>("jwt");
+    this.domain = this.configService.get<string>("domain");
+  }
+
+  /**
+   * Extracts a jwt refresh token from the cookies
+   * in the given request
+   * @param request the server request instance
+   * @param authTokenType the authentication token type
+   * @returns the jwt token present in the cookie
+   */
+  static getRefreshTokenFromRequest(request: ExpressRequest): string {
+    return request.cookies[COOKIE_CONFIG[AuthTokenType.Refresh].name];
+  }
+
+  /**
+   * Extracts a jwt access token from the authorization header
+   * in the given request
+   * @param request the server request instance
+   * @param authTokenType the authentication token type
+   * @returns the jwt token present in the cookie
+   */
+  static getAccessTokenFromRequest(request: ExpressRequest): string {
+    const authHeader = request.headers.authorization;
+    if (!authHeader?.startsWith("Bearer ")) throw new UnauthorizedException();
+    return request.headers.authorization.split(" ")[1];
   }
 
   /**
@@ -61,10 +91,14 @@ export class AuthService {
    * @param response the server response instance
    * @returns the user
    */
-  async register(createUserDto: CreateUserDto): Promise<UserResponseDto> {
+  async register(
+    request: ExpressRequest,
+    createUserDto: CreateUserDto,
+  ): Promise<UserResponseDto> {
     const uuid = await v4();
     createUserDto.uuid = uuid;
     const user = await this.userService.create(createUserDto);
+    await this.logIn(user, request);
     const userResponseDto = plainToClass(UserResponseDto, user);
     return userResponseDto;
   }
@@ -76,64 +110,117 @@ export class AuthService {
    * @param response the server response instance
    * @returns the user
    */
-  async logIn(user: User, response: Response): Promise<UserResponseDto> {
-    await this.generateAndSetCookie(user, response, AuthTokenType.Access);
-    await this.generateAndSetCookie(user, response, AuthTokenType.Refresh);
-    const userResponseDto = plainToClass(UserResponseDto, user);
+  async logIn(user: User, request: ExpressRequest): Promise<UserResponseDto> {
+    const accessToken: string = await this.generateToken(
+      user.email,
+      AuthTokenType.Access,
+    );
+
+    const newRefreshToken: string = await this.generateToken(
+      user.email,
+      AuthTokenType.Refresh,
+    );
+
+    const refreshTokenFromRequest =
+      AuthService.getRefreshTokenFromRequest(request);
+
+    const userRefreshTokens =
+      await this.authTokenRepository.getAuthTokensByUserId(user.id);
+
+    const tokenToUpdate = userRefreshTokens.find(
+      (authToken) => authToken.refreshToken === refreshTokenFromRequest,
+    );
+
+    let emptyNewRefreshTokenArray = false;
+
+    if (request.cookies?.jwt) {
+      const refreshToken = refreshTokenFromRequest;
+      const foundToken = await this.authTokenRepository.findAuthToken(
+        refreshToken,
+      );
+
+      if (!foundToken) {
+        emptyNewRefreshTokenArray = true;
+      }
+
+      request.res.clearCookie(this.refreshCookieConfig.name, {
+        ...this.refreshCookieConfig.cookieOptions,
+        maxAge: this.refreshCookieConfig.expirationTime * 1000,
+        domain: this.domain,
+      });
+    }
+
+    const userAgent = request.headers["user-agent"];
+
+    if (emptyNewRefreshTokenArray) {
+      await this.authTokenRepository.deleteAuthTokensByUserId(user.id);
+      const createAuthTokenDto = plainToInstance(CreateAuthTokenDto, {
+        userId: user.id,
+        refreshToken: newRefreshToken,
+        userAgent,
+      });
+
+      await this.authTokenRepository.createAuthToken(createAuthTokenDto);
+    } else {
+      if (tokenToUpdate) {
+        const updateAuthTokenDto = plainToInstance(UpdateAuthTokenDto, {
+          refreshToken: newRefreshToken,
+          userAgent,
+        });
+
+        await this.authTokenRepository.updateAuthToken(
+          tokenToUpdate.id,
+          updateAuthTokenDto,
+        );
+      } else {
+        const createAuthTokenDto = plainToInstance(CreateAuthTokenDto, {
+          userId: user.id,
+          refreshToken: newRefreshToken,
+          userAgent,
+        });
+
+        await this.authTokenRepository.createAuthToken(createAuthTokenDto);
+      }
+    }
+
+    this.setRefreshTokenCookie(newRefreshToken, request.res);
+
+    const userResponseDto = plainToInstance(UserResponseDto, {
+      ...user,
+      accessToken,
+    });
     return userResponseDto;
   }
 
   /**
-   * Generates and sets a jwt access or refresh token via cookies
-   * @param user the user
+   * Sets a jwt refresh token via a cookie
+   * @param refreshToken the refresh token
    * @param response the server response instance
-   * @param authTokenType the authentication token type
-   * @returns the generated jwt token
    */
-  async generateAndSetCookie(
-    user: User,
-    response: Response,
-    authTokenType: AuthTokenType,
-  ): Promise<string> {
-    const generatedToken: string = await this.generateToken(
-      user.email,
-      authTokenType,
-    );
-    let cookieKey: string;
-    let cookieOptions: CookieOptions;
-    let maxAge: number;
-    if (authTokenType === AuthTokenType.Access) {
-      cookieKey = this.accessCookieConfig.name;
-      cookieOptions = this.accessCookieConfig.cookieOptions;
-      maxAge = this.accessCookieConfig.expirationTime * 1000;
-    } else if (authTokenType === AuthTokenType.Refresh) {
-      cookieKey = this.refreshCookieConfig.name;
-      cookieOptions = this.refreshCookieConfig.cookieOptions;
-      maxAge = this.refreshCookieConfig.expirationTime * 1000;
-    }
-    response.cookie(cookieKey, generatedToken, {
+  setRefreshTokenCookie(refreshToken: string, response: ExpressRequest["res"]) {
+    const { name, cookieOptions, expirationTime } = this.refreshCookieConfig;
+    response.cookie(name, refreshToken, {
       ...cookieOptions,
-      maxAge,
+      maxAge: expirationTime * 1000,
       domain: this.domain,
     });
-    return generatedToken;
   }
 
   /**
-   * Logs a user out by clearing the jwt access and refresh cookies
+   * Logs a user out by clearing the jwt refresh cookie
    * @param response the server response instance
    * @param user the user
    */
-  async logOut(response: Response, user?: User): Promise<void> {
+  async logOut(request: ExpressRequest, user?: User): Promise<void> {
     if (user) {
-      await this.clearRefreshToken(user.email);
+      const refreshToken = AuthService.getRefreshTokenFromRequest(request);
+      await this.authTokenRepository.deleteAuthTokenByRefreshToken(
+        refreshToken,
+        user.id,
+      );
     }
-    response.clearCookie(this.accessCookieConfig.name, {
-      ...this.accessCookieConfig.cookieOptions,
-      maxAge: this.accessCookieConfig.expirationTime * 1000,
-      domain: this.domain,
-    });
-    response.clearCookie(this.refreshCookieConfig.name, {
+
+    request.res.clearCookie(this.refreshCookieConfig.name, {
       ...this.refreshCookieConfig.cookieOptions,
       maxAge: this.refreshCookieConfig.expirationTime * 1000,
       domain: this.domain,
@@ -145,8 +232,15 @@ export class AuthService {
    * @param user the user
    * @param response the server response instance
    */
-  async refreshToken(user: User, response: Response): Promise<void> {
-    await this.generateAndSetCookie(user, response, AuthTokenType.Refresh);
+  async refreshToken(
+    user: User,
+    response: ExpressRequest["res"],
+  ): Promise<void> {
+    const newRefreshToken: string = await this.generateToken(
+      user.email,
+      AuthTokenType.Refresh,
+    );
+    this.setRefreshTokenCookie(newRefreshToken, response);
   }
 
   /**
@@ -221,12 +315,37 @@ export class AuthService {
   }
 
   /**
+   * Validates a jwt access or refresh token from a cookie
+   * @param token the token to validate
+   * @param authTokenType the type of authentication token
+   * @returns the decoded access or refresh token
+   */
+  validateToken(token: string, authTokenType: AuthTokenType): TokenPayload {
+    let secret: string;
+    if (authTokenType === AuthTokenType.Access) {
+      secret = this.jwtConfig.access.secret;
+    } else if (authTokenType === AuthTokenType.Refresh) {
+      secret = this.jwtConfig.refresh.secret;
+    }
+    let tokenPayload = null;
+    try {
+      tokenPayload = this.jwtService.verify<TokenPayload>(token, {
+        secret,
+      });
+    } catch (exception) {}
+    return tokenPayload;
+  }
+
+  /**
    * Used by the Passport strategy to verify the supplied user credentials
    * @param email the users email
    * @param password the users password
    * @returns the user with the matching email and password
    */
-  async validate(emailOrUsername: string, password: string): Promise<User> {
+  async validateLocalAuth(
+    emailOrUsername: string,
+    password: string,
+  ): Promise<User> {
     const user: User = await this.userService.findByEmailOrUsername(
       emailOrUsername,
     );
@@ -237,99 +356,51 @@ export class AuthService {
   }
 
   /**
-   * Validates a jwt access or refresh token from a cookie
-   * @param token the token to validate
-   * @param authTokenType the type of authentication token
-   * @returns the decoded access or refresh token
-   */
-  validateCookieToken(
-    token: string,
-    authTokenType: AuthTokenType,
-  ): TokenPayload {
-    let secret: string;
-    if (authTokenType === AuthTokenType.Access) {
-      secret = this.jwtConfig.access.secret;
-    } else if (authTokenType === AuthTokenType.Refresh) {
-      secret = this.jwtConfig.refresh.secret;
-    }
-    return this.jwtService.verify<TokenPayload>(token, {
-      secret,
-    });
-  }
-
-  /**
-   * Extracts a jwt access or refresh token from the cookies present
-   * in the given request
-   * @param request the server request instance
-   * @param authTokenType the authentication token type
-   * @returns the jwt token present in the cookie
-   */
-  static getTokenFromRequest(
-    request: Request,
-    authTokenType: AuthTokenType,
-  ): string {
-    return request.cookies[COOKIE_CONFIG[authTokenType].name];
-  }
-
-  /**
    * Checks whether the user is authenticated or not
    * @param request the server request instance
-   * @param response the server response instance
+   * @returns the authenticated user
    * @throws UnauthorizedException
    */
-  async canActivate(
-    request: Request | RequestWithUser,
-    response: Response,
-  ): Promise<void> {
-    try {
-      // Check the access token
-      let accessToken: string = AuthService.getTokenFromRequest(
-        request,
-        AuthTokenType.Access,
-      );
-      if (!accessToken) throw new UnauthorizedException();
-      accessToken = accessToken || '';
-      const decodedAccessToken: TokenPayload = this.validateCookieToken(
-        accessToken,
-        AuthTokenType.Access,
-      );
-      if (!decodedAccessToken) throw new UnauthorizedException();
+  async validateJWT(
+    request: RequestWithUserAndAccessToken,
+    tokenPayload: TokenPayload,
+  ): Promise<User> {
+    const refreshToken: string =
+      AuthService.getRefreshTokenFromRequest(request);
+    if (!refreshToken) throw new UnauthorizedException();
 
-      // Check the refresh token
-      const refreshToken: string = AuthService.getTokenFromRequest(
-        request,
-        AuthTokenType.Refresh,
-      );
-      if (!refreshToken) throw new UnauthorizedException();
-      const decodedRefreshToken: TokenPayload = this.validateCookieToken(
-        refreshToken,
-        AuthTokenType.Refresh,
-      );
-      if (!decodedRefreshToken) throw new UnauthorizedException();
-
-      // Check if the user has the refresh token
-      const user: User = await this.userService.findByEmailAndRefreshToken(
-        decodedRefreshToken.email,
-        refreshToken,
-      );
-
-      if (!user || !user.refreshToken) throw new UnauthorizedException();
-
-      // Generate and set the new access token (in the response)
-      const newAccessToken: string = await this.generateAndSetCookie(
-        user,
-        response,
-        AuthTokenType.Access,
-      );
-
-      request.user = user;
-      // Set the new access token in the current request
-      request.cookies[this.accessCookieConfig.name] = newAccessToken;
-    } catch (err) {
-      // Something went wrong, clear the users access and refresh tokens
-      await this.logOut(response);
+    const decodedRefreshToken: TokenPayload = this.validateToken(
+      refreshToken,
+      AuthTokenType.Refresh,
+    );
+    if (!decodedRefreshToken) {
       throw new UnauthorizedException();
     }
+
+    const { email } = decodedRefreshToken;
+    const user = await this.userService.findByEmailOrUsername(email);
+
+    const userAuthTokens = await this.authTokenRepository.getAuthTokensByUserId(
+      user.id,
+    );
+
+    const foundRefreshToken = userAuthTokens.find(
+      (authToken) => authToken.refreshToken === refreshToken,
+    );
+
+    if (!foundRefreshToken) {
+      await this.logOut(request);
+      await this.authTokenRepository.deleteAuthTokensByUserId(user.id);
+      throw new UnauthorizedException();
+    }
+
+    const newAccessToken: string = await this.generateToken(
+      tokenPayload.email,
+      AuthTokenType.Access,
+    );
+
+    request.accessToken = newAccessToken;
+    return user;
   }
 
   /**
@@ -351,16 +422,20 @@ export class AuthService {
       secret = this.jwtConfig.refresh.secret;
       expiresIn = this.refreshCookieConfig.expirationTime;
     }
+    // const jwtId = await v4(); -> user RTI
+    // get user RTI
     const generatedToken: string = this.jwtService.sign(
       { email },
       {
         secret,
+        // jwtid: jwtId,
         expiresIn: `${expiresIn}s`,
       },
     );
-    if (authTokenType === AuthTokenType.Refresh) {
-      await this.userService.updateRefreshToken(email, generatedToken);
-    }
+    // if (authTokenType === AuthTokenType.Refresh) {
+    //  update user RTI
+    //  await this.userService.updateRefreshToken(email, generatedToken);
+    // }
     return generatedToken;
   }
 

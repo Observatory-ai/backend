@@ -1,8 +1,9 @@
-import { Request } from 'express';
-import { User } from '../user/user.entity';
+import { Request } from "express";
+import { User } from "../user/user.entity";
 
-interface RequestWithUser extends Request {
-  user: User;
+interface RequestWithUserAndAccessToken extends Request {
+  user?: User;
+  accessToken?: string;
 }
 
-export { RequestWithUser };
+export { RequestWithUserAndAccessToken };
