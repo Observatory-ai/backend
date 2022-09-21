@@ -7,7 +7,7 @@ import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
 import { InjectRepository } from "@nestjs/typeorm";
 import * as bcrypt from "bcryptjs";
-import { plainToClass, plainToInstance } from "class-transformer";
+import { plainToInstance } from "class-transformer";
 import { Request as ExpressRequest } from "express";
 import { InvalidCredentialsException } from "src/exception/invalid-credentials.exception";
 import { v4 } from "uuid";
@@ -101,9 +101,7 @@ export class AuthService {
     const uuid = await v4();
     createUserDto.uuid = uuid;
     const user = await this.userService.create(createUserDto);
-    await this.logIn(user, request);
-    const userResponseDto = plainToClass(UserResponseDto, user);
-    return userResponseDto;
+    return await this.logIn(user, request);
   }
 
   /**

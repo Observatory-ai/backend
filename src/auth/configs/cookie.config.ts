@@ -29,13 +29,13 @@ const COOKIE_CONFIG: Record<AuthTokenType, CookieConfig> = {
       path: "/",
     },
     // 15 minutes
-    expirationTime: 60,
+    expirationTime: 900,
   },
   REFRESH: {
     name: "jwt",
     cookieOptions: {
       httpOnly: true,
-      sameSite: "none",
+      // sameSite: "none",
       // secure: true,
       path: "/",
     },

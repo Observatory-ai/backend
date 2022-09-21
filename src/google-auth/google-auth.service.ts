@@ -1,6 +1,5 @@
 import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { plainToClass } from "class-transformer";
 import { Request as ExpressRequest } from "express";
 import { Auth, google } from "googleapis";
 import { AuthService } from "../auth/auth.service";
@@ -9,7 +8,6 @@ import { Config, GoogleConfig } from "../config/configuration.interface";
 import { CreateUserDto } from "../user/dto/create-user.dto";
 import { AuthMethod } from "../user/enum/auth-method.enum";
 import { Locale } from "../user/enum/locale.enum";
-import { User } from "../user/user.entity";
 import { UserService } from "../user/user.service";
 import { GoogleUserDto } from "./dtos/google-user.dto";
 
@@ -66,9 +64,7 @@ export class GoogleAuthService {
         authMethod: AuthMethod[googleUser.profile.provider],
         locale: Locale[locale],
       };
-      const createdUser = plainToClass(User, createUserDto);
-      await this.authService.register(request, createUserDto);
-      return await this.authService.logIn(createdUser, request);
+      return await this.authService.register(request, createUserDto);
     }
   }
 
