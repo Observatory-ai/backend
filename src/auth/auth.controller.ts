@@ -28,7 +28,7 @@ import { CreateUserDto } from "../user/dto/create-user.dto";
 import { AuthMethod } from "../user/enum/auth-method.enum";
 import { Locale } from "../user/enum/locale.enum";
 import { User } from "../user/user.entity";
-import { RequestWithUserAndAccessToken } from "../utils/requests.interface";
+import { RequestWithAccessToken } from "../utils/requests.interface";
 import { AuthService } from "./auth.service";
 import { ChangePasswordDto } from "./dtos/change-password.dto";
 import { ForgotPasswordDto } from "./dtos/forgot-password.dto";
@@ -117,10 +117,10 @@ export class AuthController {
   @Get("test")
   @UseGuards(JwtAuthenticationGuard)
   async test(
-    @Request() request: RequestWithUserAndAccessToken,
+    @Request() request: RequestWithAccessToken,
     @ReqUser() user: User,
   ): Promise<any> {
-    return { user: request.user, accessToken: request.accessToken };
+    return { user, accessToken: request.accessToken };
   }
 
   /**
@@ -159,8 +159,8 @@ export class AuthController {
   async refreshToken(
     @Request() request: ExpressRequest,
     @ReqUser() user: User,
-  ): Promise<void> {
-    return this.authService.refreshToken(user, request.res);
+  ): Promise<string> {
+    return this.authService.refreshToken(user, request);
   }
 
   /**

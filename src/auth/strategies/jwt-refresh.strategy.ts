@@ -5,7 +5,6 @@ import { Request } from "express";
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { Config, JwtConfig } from "../../config/configuration.interface";
 import { User } from "../../user/user.entity";
-import { UserService } from "../../user/user.service";
 import { AuthService } from "../auth.service";
 import { TokenPayload } from "../interfaces/token-payload.interface";
 
@@ -16,7 +15,7 @@ export class JwtRefreshStrategy extends PassportStrategy(
 ) {
   constructor(
     private readonly configService: ConfigService<Config>,
-    private readonly userService: UserService,
+    private readonly authService: AuthService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
@@ -30,14 +29,6 @@ export class JwtRefreshStrategy extends PassportStrategy(
   }
 
   async validate(request: Request, payload: TokenPayload): Promise<User> {
-    const refreshToken: string =
-      AuthService.getRefreshTokenFromRequest(request);
-    // refresh refresh token with token rotation
-    // refresh access token
-    return new User();
-    // return this.userService.findByEmailAndRefreshToken(
-    //   payload.email,
-    //   refreshToken,
-    // );
+    return this.authService.validateJWTRefresh(request, payload);
   }
 }

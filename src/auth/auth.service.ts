@@ -24,7 +24,10 @@ import { CreateUserDto } from "../user/dto/create-user.dto";
 import { User } from "../user/user.entity";
 import { UserService } from "../user/user.service";
 import { DateUtil } from "../utils/date.util";
-import { RequestWithUserAndAccessToken } from "../utils/requests.interface";
+import {
+  RequestWithAccessToken,
+  RequestWithRefreshToken,
+} from "../utils/requests.interface";
 import { AuthTokenRepository } from "./auth-token.repository";
 import {
   AuthTokenType,
@@ -124,21 +127,14 @@ export class AuthService {
     const refreshTokenFromRequest =
       AuthService.getRefreshTokenFromRequest(request);
 
-    const userRefreshTokens =
-      await this.authTokenRepository.getAuthTokensByUserId(user.id);
-
-    const tokenToUpdate = userRefreshTokens.find(
-      (authToken) => authToken.refreshToken === refreshTokenFromRequest,
+    const foundToken = await this.authTokenRepository.findAuthToken(
+      refreshTokenFromRequest,
+      user.id,
     );
 
     let emptyNewRefreshTokenArray = false;
 
     if (request.cookies?.jwt) {
-      const refreshToken = refreshTokenFromRequest;
-      const foundToken = await this.authTokenRepository.findAuthToken(
-        refreshToken,
-      );
-
       if (!foundToken) {
         emptyNewRefreshTokenArray = true;
       }
@@ -150,7 +146,7 @@ export class AuthService {
       });
     }
 
-    const userAgent = request.headers["user-agent"];
+    const userAgent = request.get("user-agent");
 
     if (emptyNewRefreshTokenArray) {
       await this.authTokenRepository.deleteAuthTokensByUserId(user.id);
@@ -162,14 +158,14 @@ export class AuthService {
 
       await this.authTokenRepository.createAuthToken(createAuthTokenDto);
     } else {
-      if (tokenToUpdate) {
+      if (foundToken) {
         const updateAuthTokenDto = plainToInstance(UpdateAuthTokenDto, {
           refreshToken: newRefreshToken,
           userAgent,
         });
 
         await this.authTokenRepository.updateAuthToken(
-          tokenToUpdate.id,
+          foundToken.id,
           updateAuthTokenDto,
         );
       } else {
@@ -216,7 +212,6 @@ export class AuthService {
       const refreshToken = AuthService.getRefreshTokenFromRequest(request);
       await this.authTokenRepository.deleteAuthTokenByRefreshToken(
         refreshToken,
-        user.id,
       );
     }
 
@@ -234,13 +229,33 @@ export class AuthService {
    */
   async refreshToken(
     user: User,
-    response: ExpressRequest["res"],
-  ): Promise<void> {
+    request: RequestWithRefreshToken,
+  ): Promise<string> {
     const newRefreshToken: string = await this.generateToken(
       user.email,
       AuthTokenType.Refresh,
     );
-    this.setRefreshTokenCookie(newRefreshToken, response);
+
+    const newAccessToken: string = await this.generateToken(
+      user.email,
+      AuthTokenType.Refresh,
+    );
+
+    const userAgent = request.get("user-agent");
+
+    const updateAuthTokenDto = plainToInstance(UpdateAuthTokenDto, {
+      refreshToken: newRefreshToken,
+      userAgent,
+    });
+
+    const authToken = request.refreshToken;
+    await this.authTokenRepository.updateAuthToken(
+      authToken.id,
+      updateAuthTokenDto,
+    );
+
+    this.setRefreshTokenCookie(newRefreshToken, request.res);
+    return newAccessToken;
   }
 
   /**
@@ -362,33 +377,33 @@ export class AuthService {
    * @throws UnauthorizedException
    */
   async validateJWT(
-    request: RequestWithUserAndAccessToken,
+    request: RequestWithAccessToken,
     tokenPayload: TokenPayload,
   ): Promise<User> {
-    const refreshToken: string =
+    const refreshTokenFromRequest: string =
       AuthService.getRefreshTokenFromRequest(request);
-    if (!refreshToken) throw new UnauthorizedException();
+    if (!refreshTokenFromRequest) throw new UnauthorizedException();
 
     const decodedRefreshToken: TokenPayload = this.validateToken(
-      refreshToken,
+      refreshTokenFromRequest,
       AuthTokenType.Refresh,
     );
     if (!decodedRefreshToken) {
+      await this.authTokenRepository.deleteAuthTokenByRefreshToken(
+        refreshTokenFromRequest,
+      );
       throw new UnauthorizedException();
     }
 
     const { email } = decodedRefreshToken;
     const user = await this.userService.findByEmailOrUsername(email);
 
-    const userAuthTokens = await this.authTokenRepository.getAuthTokensByUserId(
+    const foundToken = await this.authTokenRepository.findAuthToken(
+      refreshTokenFromRequest,
       user.id,
     );
 
-    const foundRefreshToken = userAuthTokens.find(
-      (authToken) => authToken.refreshToken === refreshToken,
-    );
-
-    if (!foundRefreshToken) {
+    if (!foundToken) {
       await this.logOut(request);
       await this.authTokenRepository.deleteAuthTokensByUserId(user.id);
       throw new UnauthorizedException();
@@ -400,6 +415,43 @@ export class AuthService {
     );
 
     request.accessToken = newAccessToken;
+    return user;
+  }
+
+  /**
+   * Checks whether the user is authenticated or not
+   * @param request the server request instance
+   * @returns the authenticated user
+   * @throws UnauthorizedException
+   */
+  async validateJWTRefresh(
+    request: RequestWithRefreshToken,
+    tokenPayload: TokenPayload,
+  ): Promise<User> {
+    const refreshTokenFromRequest =
+      AuthService.getRefreshTokenFromRequest(request);
+
+    request.res.clearCookie(this.refreshCookieConfig.name, {
+      ...this.refreshCookieConfig.cookieOptions,
+      maxAge: this.refreshCookieConfig.expirationTime * 1000,
+      domain: this.domain,
+    });
+
+    const user = await this.userService.findByEmailOrUsername(
+      tokenPayload.email,
+    );
+
+    const foundToken = await this.authTokenRepository.findAuthToken(
+      refreshTokenFromRequest,
+      user.id,
+    );
+
+    if (!foundToken) {
+      await this.authTokenRepository.deleteAuthTokensByUserId(user.id);
+      throw new UnauthorizedException();
+    }
+
+    request.refreshToken = foundToken;
     return user;
   }
 
@@ -434,7 +486,6 @@ export class AuthService {
     );
     // if (authTokenType === AuthTokenType.Refresh) {
     //  update user RTI
-    //  await this.userService.updateRefreshToken(email, generatedToken);
     // }
     return generatedToken;
   }
@@ -454,13 +505,5 @@ export class AuthService {
       hashedPassword,
     );
     return passwordsMatch;
-  }
-
-  /**
-   * Clears the users refresh token from the database
-   * @param email the users email
-   */
-  private async clearRefreshToken(email: string): Promise<void> {
-    await this.userService.clearRefreshToken(email);
   }
 }

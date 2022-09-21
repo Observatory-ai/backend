@@ -18,7 +18,7 @@ import {
 } from "../decorators/audit.decorator";
 import { User } from "../user/user.entity";
 import { UserService } from "../user/user.service";
-import { RequestWithUserAndAccessToken } from "../utils/requests.interface";
+import { RequestWithUser } from "../utils/requests.interface";
 
 /**
  * An interceptor that records every action performed by every user
@@ -44,9 +44,7 @@ export class AuditInterceptor implements NestInterceptor {
         AUDIT_RESOURCE_KEY,
         context.getHandler(),
       );
-    const request: RequestWithUserAndAccessToken = context
-      .switchToHttp()
-      .getRequest();
+    const request: RequestWithUser = context.switchToHttp().getRequest();
     const response: Response = context.switchToHttp().getResponse();
     const user: User = request.user;
     return next.handle().pipe(

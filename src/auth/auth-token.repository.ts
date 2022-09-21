@@ -10,19 +10,19 @@ export class AuthTokenRepository extends Repository<AuthToken> {
     return await this.find({ where: { userId: userId } });
   }
 
-  async findAuthToken(refreshToken: string): Promise<AuthToken | undefined> {
-    return await this.findOne({ where: { refreshToken } });
+  async findAuthToken(
+    refreshToken: string,
+    userId: number,
+  ): Promise<AuthToken | undefined> {
+    return await this.findOne({ refreshToken, userId });
   }
 
   async deleteAuthTokensByUserId(userId: number): Promise<void> {
     await this.delete({ userId });
   }
 
-  async deleteAuthTokenByRefreshToken(
-    refreshToken: string,
-    userId: number,
-  ): Promise<void> {
-    await this.delete({ refreshToken, userId });
+  async deleteAuthTokenByRefreshToken(refreshToken: string): Promise<void> {
+    await this.delete({ refreshToken });
   }
 
   async updateAuthToken(
