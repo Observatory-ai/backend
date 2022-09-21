@@ -147,7 +147,7 @@ export class AuthController {
    * @param request the request
    * @param user the user
    */
-  @Post("refresh")
+  @Get("refresh")
   @ApiCookieAuth()
   @UseGuards(JwtRefreshGuard)
   @ApiOperation({ summary: "Refresh a users access and refresh tokens" })

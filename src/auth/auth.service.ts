@@ -238,7 +238,7 @@ export class AuthService {
 
     const newAccessToken: string = await this.generateToken(
       user.email,
-      AuthTokenType.Refresh,
+      AuthTokenType.Access,
     );
 
     const userAgent = request.get("user-agent");
@@ -382,12 +382,14 @@ export class AuthService {
   ): Promise<User> {
     const refreshTokenFromRequest: string =
       AuthService.getRefreshTokenFromRequest(request);
+
     if (!refreshTokenFromRequest) throw new UnauthorizedException();
 
     const decodedRefreshToken: TokenPayload = this.validateToken(
       refreshTokenFromRequest,
       AuthTokenType.Refresh,
     );
+
     if (!decodedRefreshToken) {
       await this.authTokenRepository.deleteAuthTokenByRefreshToken(
         refreshTokenFromRequest,
