@@ -28,9 +28,6 @@ export class User extends BaseEntity {
   @Column({ unique: true, nullable: true })
   googleId: string;
 
-  // @Column({ nullable: true })
-  // refreshToken?: string;
-
   @Index({ unique: true })
   @Column({ unique: true, nullable: false, length: 50 })
   email: string;

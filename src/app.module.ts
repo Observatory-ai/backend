@@ -43,7 +43,7 @@ const Joi = require('joi');
           .required()
           .when('NODE_ENV', {
             is: EnvironmentConfig.Development,
-            then: Joi.allow('localhost'),
+            then: Joi.allow('http://localhost:4000'),
           }),
         DATABASE_URL: Joi.string().required(),
         JWT_ACCESS_SECRET: Joi.string().required(),
@@ -89,7 +89,6 @@ const Joi = require('joi');
       useFactory: async (configService: ConfigService<Config>) => {
         const databaseConfig: DatabaseConfig =
           configService.get<DatabaseConfig>('database');
-        console.log(databaseConfig.databaseUrl);
         return {
           type: 'postgres',
           url: databaseConfig.databaseUrl,

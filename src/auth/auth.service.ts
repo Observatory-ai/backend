@@ -2,45 +2,45 @@ import {
   Injectable,
   InternalServerErrorException,
   UnauthorizedException,
-} from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { JwtService } from "@nestjs/jwt";
-import { InjectRepository } from "@nestjs/typeorm";
-import * as bcrypt from "bcryptjs";
-import { plainToInstance } from "class-transformer";
-import { Request as ExpressRequest } from "express";
-import { InvalidCredentialsException } from "src/exception/invalid-credentials.exception";
-import { v4 } from "uuid";
-import { Config, JwtConfig } from "../config/configuration.interface";
-import { SamePasswordException } from "../exception/same-password.exception";
-import { PasswordChangedDto } from "../mail/dto/password-changed.dto";
-import { UserTokenDto } from "../mail/dto/user-token.dto";
-import { MailService } from "../mail/mail.service";
-import { CreateTokenDto } from "../token/dto/create-token.dto";
-import { TokenType } from "../token/enum/token-type.enum";
-import { Token } from "../token/token.entity";
-import { TokenService } from "../token/token.service";
-import { CreateUserDto } from "../user/dto/create-user.dto";
-import { User } from "../user/user.entity";
-import { UserService } from "../user/user.service";
-import { DateUtil } from "../utils/date.util";
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { JwtService } from '@nestjs/jwt';
+import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcryptjs';
+import { plainToInstance } from 'class-transformer';
+import { Request as ExpressRequest } from 'express';
+import { InvalidCredentialsException } from 'src/exception/invalid-credentials.exception';
+import { v4 } from 'uuid';
+import { Config, JwtConfig } from '../config/configuration.interface';
+import { SamePasswordException } from '../exception/same-password.exception';
+import { PasswordChangedDto } from '../mail/dto/password-changed.dto';
+import { UserTokenDto } from '../mail/dto/user-token.dto';
+import { MailService } from '../mail/mail.service';
+import { CreateTokenDto } from '../token/dto/create-token.dto';
+import { TokenType } from '../token/enum/token-type.enum';
+import { Token } from '../token/token.entity';
+import { TokenService } from '../token/token.service';
+import { CreateUserDto } from '../user/dto/create-user.dto';
+import { User } from '../user/user.entity';
+import { UserService } from '../user/user.service';
+import { DateUtil } from '../utils/date.util';
 import {
   RequestWithAccessToken,
   RequestWithRefreshToken,
-} from "../utils/requests.interface";
-import { AuthTokenRepository } from "./auth-token.repository";
+} from '../utils/requests.interface';
+import { AuthTokenRepository } from './auth-token.repository';
 import {
   AuthTokenType,
   CookieConfig,
   COOKIE_CONFIG,
-} from "./configs/cookie.config";
-import { ChangePasswordDto } from "./dtos/change-password.dto";
-import { CreateAuthTokenDto } from "./dtos/create-auth-token.dto";
-import { ForgotPasswordDto } from "./dtos/forgot-password.dto";
-import { UserResponseDto } from "./dtos/responses/user-response.dto";
-import { UpdateAuthTokenDto } from "./dtos/update-auth-token.dto";
-import { VerifyAccountDto } from "./dtos/verify-account.dto";
-import { TokenPayload } from "./interfaces/token-payload.interface";
+} from './configs/cookie.config';
+import { ChangePasswordDto } from './dtos/change-password.dto';
+import { CreateAuthTokenDto } from './dtos/create-auth-token.dto';
+import { ForgotPasswordDto } from './dtos/forgot-password.dto';
+import { UserResponseDto } from './dtos/responses/user-response.dto';
+import { UpdateAuthTokenDto } from './dtos/update-auth-token.dto';
+import { VerifyAccountDto } from './dtos/verify-account.dto';
+import { TokenPayload } from './interfaces/token-payload.interface';
 
 @Injectable()
 export class AuthService {
@@ -60,8 +60,8 @@ export class AuthService {
     private readonly tokenService: TokenService,
     private readonly mailService: MailService,
   ) {
-    this.jwtConfig = this.configService.get<JwtConfig>("jwt");
-    this.domain = this.configService.get<string>("domain");
+    this.jwtConfig = this.configService.get<JwtConfig>('jwt');
+    this.domain = this.configService.get<string>('domain');
   }
 
   /**
@@ -84,8 +84,8 @@ export class AuthService {
    */
   static getAccessTokenFromRequest(request: ExpressRequest): string {
     const authHeader = request.headers.authorization;
-    if (!authHeader?.startsWith("Bearer ")) throw new UnauthorizedException();
-    return request.headers.authorization.split(" ")[1];
+    if (!authHeader?.startsWith('Bearer ')) throw new UnauthorizedException();
+    return request.headers.authorization.split(' ')[1];
   }
 
   /**
@@ -137,14 +137,10 @@ export class AuthService {
         emptyNewRefreshTokenArray = true;
       }
 
-      request.res.clearCookie(this.refreshCookieConfig.name, {
-        ...this.refreshCookieConfig.cookieOptions,
-        maxAge: this.refreshCookieConfig.expirationTime * 1000,
-        domain: this.domain,
-      });
+      this.clearRefreshTokenCookie(request.res);
     }
 
-    const userAgent = request.get("user-agent");
+    const userAgent = request.get('user-agent');
 
     if (emptyNewRefreshTokenArray) {
       await this.authTokenRepository.deleteAuthTokensByUserId(user.id);
@@ -191,12 +187,25 @@ export class AuthService {
    * @param refreshToken the refresh token
    * @param response the server response instance
    */
-  setRefreshTokenCookie(refreshToken: string, response: ExpressRequest["res"]) {
+  setRefreshTokenCookie(refreshToken: string, response: ExpressRequest['res']) {
     const { name, cookieOptions, expirationTime } = this.refreshCookieConfig;
     response.cookie(name, refreshToken, {
       ...cookieOptions,
       maxAge: expirationTime * 1000,
-      domain: this.domain,
+      domain: 'localhost', // this.domain
+    });
+  }
+
+  /**
+   * Clears the jwt refresh token cookie
+   * @param response the server response instance
+   */
+  clearRefreshTokenCookie(response: ExpressRequest['res']) {
+    const { name, cookieOptions, expirationTime } = this.refreshCookieConfig;
+    response.clearCookie(name, {
+      ...cookieOptions,
+      maxAge: expirationTime * 1000,
+      domain: 'localhost', // this.domain
     });
   }
 
@@ -213,11 +222,7 @@ export class AuthService {
       );
     }
 
-    request.res.clearCookie(this.refreshCookieConfig.name, {
-      ...this.refreshCookieConfig.cookieOptions,
-      maxAge: this.refreshCookieConfig.expirationTime * 1000,
-      domain: this.domain,
-    });
+    this.clearRefreshTokenCookie(request.res);
   }
 
   /**
@@ -239,7 +244,7 @@ export class AuthService {
       AuthTokenType.Access,
     );
 
-    const userAgent = request.get("user-agent");
+    const userAgent = request.get('user-agent');
 
     const updateAuthTokenDto = plainToInstance(UpdateAuthTokenDto, {
       refreshToken: newRefreshToken,
@@ -431,11 +436,7 @@ export class AuthService {
     const refreshTokenFromRequest =
       AuthService.getRefreshTokenFromRequest(request);
 
-    request.res.clearCookie(this.refreshCookieConfig.name, {
-      ...this.refreshCookieConfig.cookieOptions,
-      maxAge: this.refreshCookieConfig.expirationTime * 1000,
-      domain: this.domain,
-    });
+    this.clearRefreshTokenCookie(request.res);
 
     const user = await this.userService.findByEmailOrUsername(
       tokenPayload.email,
