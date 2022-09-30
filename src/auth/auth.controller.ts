@@ -138,7 +138,7 @@ export class AuthController {
   async logOut(
     @Request() request: ExpressRequest,
     @ReqUser() user: User,
-  ): Promise<void> {
+  ): Promise<boolean> {
     return this.authService.logOut(request, user);
   }
 

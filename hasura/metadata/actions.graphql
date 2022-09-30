@@ -5,7 +5,7 @@ type Mutation {
 }
 
 type Mutation {
-  logout: Void
+  logout: Boolean
 }
 
 type Mutation {

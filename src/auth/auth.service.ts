@@ -214,7 +214,7 @@ export class AuthService {
    * @param response the server response instance
    * @param user the user
    */
-  async logOut(request: ExpressRequest, user?: User): Promise<void> {
+  async logOut(request: ExpressRequest, user?: User): Promise<boolean> {
     if (user) {
       const refreshToken = AuthService.getRefreshTokenFromRequest(request);
       await this.authTokenRepository.deleteAuthTokenByRefreshToken(
@@ -223,6 +223,7 @@ export class AuthService {
     }
 
     this.clearRefreshTokenCookie(request.res);
+    return true;
   }
 
   /**
