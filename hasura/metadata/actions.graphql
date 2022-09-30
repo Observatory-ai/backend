@@ -1,0 +1,50 @@
+type Mutation {
+  login(
+    loginInput: LoginInput!
+  ): LoginOutput
+}
+
+type Mutation {
+  logout: Void
+}
+
+type Mutation {
+  refreshTokens: Void
+}
+
+type Mutation {
+  register(
+    registerInput: RegisterInput!
+  ): RegisterOutput
+}
+
+input LoginInput {
+  emailOrUsername: String!
+  password: String!
+}
+
+input RegisterInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+  username: String!
+  password: String!
+  confirmPassword: String!
+}
+
+type LoginOutput {
+  accessToken: String!
+  uuid: String!
+  email: String!
+  username: String!
+}
+
+type RegisterOutput {
+  accessToken: String!
+  uuid: String!
+  email: String!
+  username: String!
+}
+
+scalar Void
+

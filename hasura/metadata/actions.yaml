@@ -1,6 +1,83 @@
-actions: []
+actions:
+  - name: login
+    definition:
+      kind: synchronous
+      handler: http://host.docker.internal:3000
+      forward_client_headers: true
+      request_transform:
+        body:
+          action: transform
+          template: |-
+            {
+                "emailOrUsername": {{$body.input.loginInput.emailOrUsername}},
+                "password": {{$body.input.loginInput.password}}
+            }
+        method: POST
+        query_params: {}
+        template_engine: Kriti
+        url: '{{$base_url}}/api/auth/login'
+        version: 2
+    comment: login
+  - name: logout
+    definition:
+      kind: synchronous
+      handler: http://host.docker.internal:3000
+      forward_client_headers: true
+      request_transform:
+        body:
+          action: transform
+          template: '{}'
+        method: POST
+        query_params: {}
+        template_engine: Kriti
+        url: '{{$base_url}}/api/auth/logout'
+        version: 2
+    comment: logout
+  - name: refreshTokens
+    definition:
+      kind: synchronous
+      handler: http://host.docker.internal:3000
+      forward_client_headers: true
+      request_transform:
+        body:
+          action: transform
+          template: '{}'
+        method: POST
+        query_params: {}
+        template_engine: Kriti
+        url: '{{$base_url}}/api/auth/refresh'
+        version: 2
+    comment: refresh auth tokens
+  - name: register
+    definition:
+      kind: synchronous
+      handler: http://host.docker.internal:3000
+      forward_client_headers: true
+      request_transform:
+        body:
+          action: transform
+          template: |-
+            {
+                "email": {{$body.input.registerInput.email}},
+                "firstName": {{$body.input.registerInput.firstName}},
+                "lastName": {{$body.input.registerInput.lastName}},
+                "username": {{$body.input.registerInput.username}},
+                "password": {{$body.input.registerInput.password}},
+                "confirmPassword": {{$body.input.registerInput.confirmPassword}}
+            }
+        method: POST
+        query_params: {}
+        template_engine: Kriti
+        url: '{{$base_url}}/api/auth/register'
+        version: 2
+    comment: register
 custom_types:
   enums: []
-  input_objects: []
-  objects: []
-  scalars: []
+  input_objects:
+    - name: LoginInput
+    - name: RegisterInput
+  objects:
+    - name: LoginOutput
+    - name: RegisterOutput
+  scalars:
+    - name: Void

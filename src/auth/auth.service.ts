@@ -233,7 +233,7 @@ export class AuthService {
   async refreshToken(
     user: User,
     request: RequestWithRefreshToken,
-  ): Promise<string> {
+  ): Promise<UserResponseDto> {
     const newRefreshToken: string = await this.generateToken(
       user.email,
       AuthTokenType.Refresh,
@@ -258,7 +258,13 @@ export class AuthService {
     );
 
     this.setRefreshTokenCookie(newRefreshToken, request.res);
-    return newAccessToken;
+
+    const userResponseDto = plainToInstance(UserResponseDto, {
+      ...user,
+      accessToken: newAccessToken,
+    });
+
+    return userResponseDto;
   }
 
   /**
@@ -436,8 +442,6 @@ export class AuthService {
     const refreshTokenFromRequest =
       AuthService.getRefreshTokenFromRequest(request);
 
-    this.clearRefreshTokenCookie(request.res);
-
     const user = await this.userService.findByEmailOrUsername(
       tokenPayload.email,
     );
@@ -449,6 +453,7 @@ export class AuthService {
 
     if (!foundToken) {
       await this.authTokenRepository.deleteAuthTokensByUserId(user.id);
+      this.clearRefreshTokenCookie(request.res);
       throw new UnauthorizedException();
     }
 
