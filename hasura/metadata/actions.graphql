@@ -9,7 +9,7 @@ type Mutation {
 }
 
 type Mutation {
-  refreshTokens: Void
+  refreshTokens: RefreshTokensOutput
 }
 
 type Mutation {
@@ -40,6 +40,13 @@ type LoginOutput {
 }
 
 type RegisterOutput {
+  accessToken: String!
+  uuid: String!
+  email: String!
+  username: String!
+}
+
+type RefreshTokensOutput {
   accessToken: String!
   uuid: String!
   email: String!

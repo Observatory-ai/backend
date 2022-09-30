@@ -79,5 +79,6 @@ custom_types:
   objects:
     - name: LoginOutput
     - name: RegisterOutput
+    - name: RefreshTokensOutput
   scalars:
     - name: Void
