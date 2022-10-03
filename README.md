@@ -40,6 +40,11 @@ Mac: hasura migrate apply --database-name observatory
 Windows (npm installation): npx hasura migrate apply --database-name observatory
 ```
 
+#### Apply metadata
+```
+hasura metadata apply
+```
+
 ## Example .env file
 
 ```dosini
@@ -48,7 +53,7 @@ NODE_ENV=development
 # Log Level
 LOG_LEVEL=log,warn,error
 # Domain
-DOMAIN=localhost
+DOMAIN= http://localhost:4000
 # Database
 DATABASE_URL=postgres://postgres:postgrespassword@localhost:5432/postgres
 # JWT
