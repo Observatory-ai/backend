@@ -1,5 +1,8 @@
 # Observatory API
 
+## Corequisites
+This project must be run alongside the frontend. You can find our frontend repository [here](https://github.com/Observatory-ai/frontend).
+
 ## Installation
 
 1. Install the Hasura CLI:
