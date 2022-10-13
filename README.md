@@ -1,5 +1,8 @@
 # Observatory API
 
+## Corequisites
+This project must be run alongside the frontend. You can find our frontend repository [here](https://github.com/Observatory-ai/frontend).
+
 ## Installation
 
 1. Install the Hasura CLI:
@@ -22,7 +25,7 @@ Windows (npm installation): npx hasura console
 
 4. Connect to the observatory database in Hasura
 
-![hasura databse connection](https://drive.google.com/uc?id=1b9AEGIfOmNrzf0iZqwMi_YpY9Ll-eCDq)
+![hasura database connection](https://drive.google.com/uc?id=1b9AEGIfOmNrzf0iZqwMi_YpY9Ll-eCDq)
 
 ## Hasura commands
 
@@ -40,6 +43,11 @@ Mac: hasura migrate apply --database-name observatory
 Windows (npm installation): npx hasura migrate apply --database-name observatory
 ```
 
+#### Apply metadata
+```
+hasura metadata apply
+```
+
 ## Example .env file
 
 ```dosini
@@ -48,7 +56,7 @@ NODE_ENV=development
 # Log Level
 LOG_LEVEL=log,warn,error
 # Domain
-DOMAIN=localhost
+DOMAIN= http://localhost:4000
 # Database
 DATABASE_URL=postgres://postgres:postgrespassword@localhost:5432/postgres
 # JWT
