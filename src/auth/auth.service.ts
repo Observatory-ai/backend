@@ -9,7 +9,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
 import { plainToInstance } from 'class-transformer';
 import { Request as ExpressRequest } from 'express';
-import { InvalidCredentialsException } from 'src/exception/invalid-credentials.exception';
+import { InvalidCredentialsException } from '../exception/invalid-credentials.exception';
 import { v4 } from 'uuid';
 import { Config, JwtConfig } from '../config/configuration.interface';
 import { SamePasswordException } from '../exception/same-password.exception';
