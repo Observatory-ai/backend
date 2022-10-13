@@ -22,7 +22,7 @@ Windows (npm installation): npx hasura console
 
 4. Connect to the observatory database in Hasura
 
-![hasura databse connection](https://drive.google.com/uc?id=1b9AEGIfOmNrzf0iZqwMi_YpY9Ll-eCDq)
+![hasura database connection](https://drive.google.com/uc?id=1b9AEGIfOmNrzf0iZqwMi_YpY9Ll-eCDq)
 
 ## Hasura commands
 

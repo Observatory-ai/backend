@@ -1,15 +1,15 @@
-import { Injectable, UnauthorizedException } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { Request as ExpressRequest } from "express";
-import { Auth, google } from "googleapis";
-import { AuthService } from "../auth/auth.service";
-import { UserResponseDto } from "../auth/dtos/responses/user-response.dto";
-import { Config, GoogleConfig } from "../config/configuration.interface";
-import { CreateUserDto } from "../user/dto/create-user.dto";
-import { AuthMethod } from "../user/enum/auth-method.enum";
-import { Locale } from "../user/enum/locale.enum";
-import { UserService } from "../user/user.service";
-import { GoogleUserDto } from "./dtos/google-user.dto";
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { Request as ExpressRequest } from 'express';
+import { Auth, google } from 'googleapis';
+import { AuthService } from '../auth/auth.service';
+import { UserResponseDto } from '../auth/dtos/responses/user-response.dto';
+import { Config, GoogleConfig } from '../config/configuration.interface';
+import { CreateUserDto } from '../user/dto/create-user.dto';
+import { AuthMethod } from '../user/enum/auth-method.enum';
+import { Locale } from '../user/enum/locale.enum';
+import { UserService } from '../user/user.service';
+import { GoogleAuthDto } from './dtos/google-auth.dto';
 
 @Injectable()
 export class GoogleAuthService {
@@ -20,9 +20,9 @@ export class GoogleAuthService {
     private readonly configService: ConfigService<Config>,
   ) {
     const clientID =
-      this.configService.get<GoogleConfig>("google").authClientId;
+      this.configService.get<GoogleConfig>('google').authClientId;
     const clientSecret =
-      this.configService.get<GoogleConfig>("google").authClientSecret;
+      this.configService.get<GoogleConfig>('google').authClientSecret;
 
     this.oauthClient = new google.auth.OAuth2(clientID, clientSecret);
   }
@@ -34,34 +34,39 @@ export class GoogleAuthService {
    * @returns the response object for authentication
    */
   async authenticate(
-    googleUser: GoogleUserDto,
+    googleAuthDto: GoogleAuthDto, // googleUser: GoogleUserDto,
     request: ExpressRequest,
   ): Promise<UserResponseDto> {
-    if (!googleUser) {
+    if (!googleAuthDto.accessToken) {
       throw new UnauthorizedException();
     }
-    const user = await this.userService.getByEmail(
-      googleUser.profile._json.email,
-    );
+
+    this.setGoogleClientAccessToken(googleAuthDto.accessToken);
+    const { data: googleUser } = await google
+      .oauth2('v2')
+      .userinfo.get({ auth: this.oauthClient });
+
+    const user = await this.userService.getByEmail(googleUser.email);
+
     if (user) {
       if (user.authMethod == AuthMethod.Local) {
         // update missing field provided by google (firstName, lastName, avatar(if not set), authMethod, locale, googleId)
       }
       return await this.authService.logIn(user, request);
     } else {
-      //   await this.setGoogleClientAccessToken(googleUser.accessToken);
-      const locale = googleUser.profile._json.locale.replace(/-/g, "_");
+      console.log(googleUser.hd);
+      const locale = googleUser.locale.replace(/-/g, '_');
       let createUserDto: CreateUserDto = {
-        email: googleUser.profile._json.email,
-        username: googleUser.profile.displayName,
-        firstName: googleUser.profile._json.given_name,
-        lastName: googleUser.profile._json.family_name,
-        avatar: googleUser.profile._json.picture,
+        email: googleUser.email,
+        username: googleUser.name,
+        firstName: googleUser.given_name,
+        lastName: googleUser.family_name,
+        avatar: googleUser.picture,
         password: null,
         uuid: null,
-        googleId: googleUser.profile.id,
-        isVerified: googleUser.profile._json.email_verified,
-        authMethod: AuthMethod[googleUser.profile.provider],
+        googleId: googleUser.id,
+        isVerified: googleUser.verified_email,
+        authMethod: AuthMethod.google,
         locale: Locale[locale],
       };
       return await this.authService.register(request, createUserDto);

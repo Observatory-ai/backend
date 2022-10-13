@@ -1,4 +1,21 @@
 actions:
+  - name: googleAuth
+    definition:
+      kind: synchronous
+      handler: http://host.docker.internal:3000
+      request_transform:
+        body:
+          action: transform
+          template: |-
+            {
+                "accessToken": {{$body.input.googleAuthInput.accessToken}}
+            }
+        method: POST
+        query_params: {}
+        template_engine: Kriti
+        url: '{{$base_url}}/api/auth/google/authenticate'
+        version: 2
+    comment: google auth
   - name: login
     definition:
       kind: synchronous
@@ -76,9 +93,11 @@ custom_types:
   input_objects:
     - name: LoginInput
     - name: RegisterInput
+    - name: GoogleAuthInput
   objects:
     - name: LoginOutput
     - name: RegisterOutput
     - name: RefreshTokensOutput
+    - name: GoogleAuthOutput
   scalars:
     - name: Void
