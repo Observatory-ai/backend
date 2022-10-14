@@ -34,7 +34,7 @@ export class GoogleAuthService {
    * @returns the response object for authentication
    */
   async authenticate(
-    googleAuthDto: GoogleAuthDto, // googleUser: GoogleUserDto,
+    googleAuthDto: GoogleAuthDto,
     request: ExpressRequest,
   ): Promise<UserResponseDto> {
     if (!googleAuthDto.accessToken) {
@@ -54,7 +54,6 @@ export class GoogleAuthService {
       }
       return await this.authService.logIn(user, request);
     } else {
-      console.log(googleUser.hd);
       const locale = googleUser.locale.replace(/-/g, '_');
       let createUserDto: CreateUserDto = {
         email: googleUser.email,

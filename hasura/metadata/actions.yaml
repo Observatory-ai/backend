@@ -95,9 +95,6 @@ custom_types:
     - name: RegisterInput
     - name: GoogleAuthInput
   objects:
-    - name: LoginOutput
-    - name: RegisterOutput
-    - name: RefreshTokensOutput
-    - name: GoogleAuthOutput
+    - name: AuthOutput
   scalars:
     - name: Void

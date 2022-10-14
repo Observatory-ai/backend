@@ -1,13 +1,13 @@
 type Mutation {
   googleAuth(
     googleAuthInput: GoogleAuthInput!
-  ): GoogleAuthOutput
+  ): AuthOutput
 }
 
 type Mutation {
   login(
     loginInput: LoginInput!
-  ): LoginOutput
+  ): AuthOutput
 }
 
 type Mutation {
@@ -15,13 +15,13 @@ type Mutation {
 }
 
 type Mutation {
-  refreshTokens: RefreshTokensOutput
+  refreshTokens: AuthOutput
 }
 
 type Mutation {
   register(
     registerInput: RegisterInput!
-  ): RegisterOutput
+  ): AuthOutput
 }
 
 input LoginInput {
@@ -42,28 +42,7 @@ input GoogleAuthInput {
   accessToken: String
 }
 
-type LoginOutput {
-  accessToken: String!
-  uuid: String!
-  email: String!
-  username: String!
-}
-
-type RegisterOutput {
-  accessToken: String!
-  uuid: String!
-  email: String!
-  username: String!
-}
-
-type RefreshTokensOutput {
-  accessToken: String!
-  uuid: String!
-  email: String!
-  username: String!
-}
-
-type GoogleAuthOutput {
+type AuthOutput {
   accessToken: String!
   uuid: String!
   email: String!

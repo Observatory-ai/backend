@@ -22,6 +22,7 @@ async function bootstrap() {
     new ValidationPipe({
       forbidUnknownValues: true,
       whitelist: true,
+      transform: true,
     }),
   );
   app.use(cookieParser());

@@ -1,12 +1,12 @@
-import { Injectable } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
-import { PassportStrategy } from "@nestjs/passport";
-import { ExtractJwt, Strategy } from "passport-jwt";
-import { RequestWithAccessToken } from "src/utils/requests.interface";
-import { Config, JwtConfig } from "../../config/configuration.interface";
-import { User } from "../../user/user.entity";
-import { AuthService } from "../auth.service";
-import { TokenPayload } from "../interfaces/token-payload.interface";
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { PassportStrategy } from '@nestjs/passport';
+import { ExtractJwt, Strategy } from 'passport-jwt';
+import { Config, JwtConfig } from '../../config/configuration.interface';
+import { User } from '../../user/user.entity';
+import { RequestWithAccessToken } from '../../utils/requests.interface';
+import { AuthService } from '../auth.service';
+import { TokenPayload } from '../interfaces/token-payload.interface';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -17,7 +17,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<JwtConfig>("jwt").access.secret,
+      secretOrKey: configService.get<JwtConfig>('jwt').access.secret,
       passReqToCallback: true,
     });
   }

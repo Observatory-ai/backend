@@ -1,6 +1,6 @@
-import { Request } from "express";
-import { AuthToken } from "src/auth/auth-token.entity";
-import { User } from "../user/user.entity";
+import { Request } from 'express';
+import { AuthToken } from '../auth/auth-token.entity';
+import { User } from '../user/user.entity';
 
 interface RequestWithUser extends Request {
   user?: User;

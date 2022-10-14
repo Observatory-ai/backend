@@ -2,6 +2,7 @@ import { Body, Controller, Post, Request } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Request as ExpressRequest } from 'express';
 import { UserResponseDto } from '../auth/dtos/responses/user-response.dto';
+import { GoogleAuthDto } from './dtos/google-auth.dto';
 import { GoogleAuthService } from './google-auth.service';
 
 @Controller('api/auth')
@@ -11,7 +12,7 @@ export class GoogleAuthController {
 
   @Post('google/authenticate')
   authenticate(
-    @Body() googleAuthDto: any,
+    @Body() googleAuthDto: GoogleAuthDto,
     @Request() request: ExpressRequest,
   ): Promise<UserResponseDto> {
     return this.googleAuthService.authenticate(googleAuthDto, request);
