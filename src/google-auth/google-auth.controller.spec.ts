@@ -15,4 +15,8 @@ describe('GoogleAuthController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
+
+  // it('should authenticate Google', () =>{
+  //   expect(controller.create({googleAuthDto: '',}))
+  // })
 });
