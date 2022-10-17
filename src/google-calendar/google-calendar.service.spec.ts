@@ -4,10 +4,15 @@ import { GoogleCalendarService } from './google-calendar.service';
 describe('GoogleCalendarService', () => {
   let service: GoogleCalendarService;
 
+  const mockGoogleCalendarService = {};
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [GoogleCalendarService],
-    }).compile();
+    })
+    .overrideProvider(GoogleCalendarService)
+    .useValue(mockGoogleCalendarService)
+    .compile();
 
     service = module.get<GoogleCalendarService>(GoogleCalendarService);
   });

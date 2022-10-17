@@ -10,7 +10,6 @@ import { Api } from '../service-integration/enum/api.enum';
 import { ServiceType } from '../service-integration/enum/service-type.enum';
 import { ServiceIntegrationService } from '../service-integration/service-integration.service';
 import { User } from '../user/user.entity';
-import { plainToClass } from 'class-transformer';
 const url = require('url');
 
 @Injectable()
