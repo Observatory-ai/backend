@@ -1,5 +1,5 @@
-import { AuthMethod } from '../enum/auth-method.enum';
-import { Locale } from '../enum/locale.enum';
+import { AuthMethod } from '../enums/auth-method.enum';
+import { Locale } from '../enums/locale.enum';
 
 export class CreateUserDto {
   email: string;

@@ -1,16 +1,15 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { plainToClass } from 'class-transformer';
-import { Request as ExpressRequest } from 'express';
 import { Auth, google } from 'googleapis';
 import { UserResponseDto } from '../auth/dtos/responses/user-response.dto';
 import { Config, GoogleConfig } from '../config/configuration.interface';
-import { CreateServiceDto } from '../service-integration/dto/create-service.dto';
+import { CreateServiceDto } from '../service-integration/dtos/create-service.dto';
 import { Api } from '../service-integration/enum/api.enum';
 import { ServiceType } from '../service-integration/enum/service-type.enum';
 import { ServiceIntegrationService } from '../service-integration/service-integration.service';
 import { User } from '../user/user.entity';
-import { plainToClass } from 'class-transformer';
+import { GoogleCalendarActivationDto } from './dtos/google-calendar-activation.dto';
 const url = require('url');
 
 @Injectable()
@@ -25,31 +24,7 @@ export class GoogleCalendarService {
     const clientSecret =
       this.configService.get<GoogleConfig>('google').authClientSecret;
 
-    this.oauthClient = new google.auth.OAuth2(
-      clientID,
-      clientSecret,
-      'http://localhost:3000/api/google-calendar/activate/callback',
-    );
-  }
-
-  /**
-   * Authenticate with Google
-   * @param user the user
-   * @param response the server response instance
-   * @returns the response object for authentication
-   */
-  async requestService(user: User, request: ExpressRequest): Promise<void> {
-    // check if user is authenticated with google
-    // if not get user google info
-    const authorizationUrl = this.oauthClient.generateAuthUrl({
-      access_type: 'offline',
-      login_hint: user.email,
-      scope: ['https://www.googleapis.com/auth/calendar.events.readonly'],
-      include_granted_scopes: true,
-      redirect_uri:
-        'http://localhost:3000/api/google-calendar/activate/callback',
-    });
-    request.res.redirect(authorizationUrl);
+    this.oauthClient = new google.auth.OAuth2(clientID, clientSecret);
   }
 
   /**
@@ -59,13 +34,15 @@ export class GoogleCalendarService {
    * @returns the response object for authentication
    */
   async activateService(
-    request: ExpressRequest,
+    googleCalendarActivationDto: GoogleCalendarActivationDto,
     user: User,
   ): Promise<UserResponseDto> {
-    let query = url.parse(request.url, true).query;
-    if (query.error) throw new UnauthorizedException();
+    // let query = url.parse(request.url, true).query;
+    // if (query.error) throw new UnauthorizedException();
 
-    let { tokens } = await this.oauthClient.getToken(query.code);
+    let { tokens } = await this.oauthClient.getToken(
+      googleCalendarActivationDto.accessToken,
+    );
     this.setGoogleClientTokens(tokens.refresh_token, tokens.access_token);
 
     if (

@@ -1,7 +1,7 @@
-import { DateUtil } from '../utils/date.util';
 import { EntityRepository, LessThanOrEqual, Repository } from 'typeorm';
+import { DateUtil } from '../utils/date.util';
 import { AuditLog } from './audit-log.entity';
-import { CreateAuditLogDto } from './dto/create-audit-log.dto';
+import { CreateAuditLogDto } from './dtos/create-audit-log.dto';
 
 @EntityRepository(AuditLog)
 export class AuditRepository extends Repository<AuditLog> {

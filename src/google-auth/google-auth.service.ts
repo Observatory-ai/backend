@@ -5,9 +5,9 @@ import { Auth, google } from 'googleapis';
 import { AuthService } from '../auth/auth.service';
 import { UserResponseDto } from '../auth/dtos/responses/user-response.dto';
 import { Config, GoogleConfig } from '../config/configuration.interface';
-import { CreateUserDto } from '../user/dto/create-user.dto';
-import { AuthMethod } from '../user/enum/auth-method.enum';
-import { Locale } from '../user/enum/locale.enum';
+import { CreateUserDto } from '../user/dtos/create-user.dto';
+import { AuthMethod } from '../user/enums/auth-method.enum';
+import { Locale } from '../user/enums/locale.enum';
 import { UserService } from '../user/user.service';
 import { GoogleAuthDto } from './dtos/google-auth.dto';
 

@@ -1,23 +1,23 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { InjectRepository } from "@nestjs/typeorm";
-import * as bcrypt from "bcryptjs";
-import { v4 } from "uuid";
-import { AccountDisabledException } from "../exception/account-disabled.exception";
+import { Injectable, Logger } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import * as bcrypt from 'bcryptjs';
+import { v4 } from 'uuid';
+import { AccountDisabledException } from '../exception/account-disabled.exception';
 import {
   UserNotFoundException,
   UserWithIdNotFoundException,
-} from "../exception/user-not-found.exception";
-import { UserTokenDto } from "../mail/dto/user-token.dto";
-import { MailService } from "../mail/mail.service";
-import { CreateTokenDto } from "../token/dto/create-token.dto";
-import { TokenType } from "../token/enum/token-type.enum";
-import { Token } from "../token/token.entity";
-import { TokenService } from "../token/token.service";
-import { DateUtil } from "../utils/date.util";
-import { CreateUserDto } from "./dto/create-user.dto";
-import { UpdateUserDto } from "./dto/update-user.dto";
-import { User } from "./user.entity";
-import { UserRepository } from "./user.repository";
+} from '../exception/user-not-found.exception';
+import { UserTokenDto } from '../mail/dtos/user-token.dto';
+import { MailService } from '../mail/mail.service';
+import { CreateTokenDto } from '../token/dtos/create-token.dto';
+import { TokenType } from '../token/enums/token-type.enum';
+import { Token } from '../token/token.entity';
+import { TokenService } from '../token/token.service';
+import { DateUtil } from '../utils/date.util';
+import { CreateUserDto } from './dtos/create-user.dto';
+import { UpdateUserDto } from './dtos/update-user.dto';
+import { User } from './user.entity';
+import { UserRepository } from './user.repository';
 
 @Injectable()
 export class UserService {

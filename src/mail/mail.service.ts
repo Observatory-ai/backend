@@ -1,9 +1,9 @@
-import { ConfigService } from '@nestjs/config';
-import { Injectable, Logger } from '@nestjs/common';
 import { ISendMailOptions, MailerService } from '@nestjs-modules/mailer';
+import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Config } from '../config/configuration.interface';
-import { UserTokenDto } from './dto/user-token.dto';
-import { PasswordChangedDto } from './dto/password-changed.dto';
+import { PasswordChangedDto } from './dtos/password-changed.dto';
+import { UserTokenDto } from './dtos/user-token.dto';
 
 @Injectable()
 export class MailService {

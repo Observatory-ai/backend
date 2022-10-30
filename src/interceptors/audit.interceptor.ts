@@ -3,22 +3,22 @@ import {
   ExecutionContext,
   Injectable,
   NestInterceptor,
-} from "@nestjs/common";
-import { Reflector } from "@nestjs/core";
-import { Response } from "express";
-import { Observable, throwError } from "rxjs";
-import { catchError, tap } from "rxjs/operators";
-import { AuditService } from "../audit/audit.service";
-import { CreateAuditLogDto } from "../audit/dto/create-audit-log.dto";
-import { AuditActionDto } from "../audit/enum/audit-action.enum";
-import { AuditResourceDto } from "../audit/enum/audit-resource.enum";
+} from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
+import { Response } from 'express';
+import { Observable, throwError } from 'rxjs';
+import { catchError, tap } from 'rxjs/operators';
+import { AuditService } from '../audit/audit.service';
+import { CreateAuditLogDto } from '../audit/dtos/create-audit-log.dto';
+import { AuditActionDto } from '../audit/enums/audit-action.enum';
+import { AuditResourceDto } from '../audit/enums/audit-resource.enum';
 import {
   AUDIT_ACTION_KEY,
   AUDIT_RESOURCE_KEY,
-} from "../decorators/audit.decorator";
-import { User } from "../user/user.entity";
-import { UserService } from "../user/user.service";
-import { RequestWithUser } from "../utils/requests.interface";
+} from '../decorators/audit.decorator';
+import { User } from '../user/user.entity';
+import { UserService } from '../user/user.service';
+import { RequestWithUser } from '../utils/requests.interface';
 
 /**
  * An interceptor that records every action performed by every user
@@ -54,7 +54,7 @@ export class AuditInterceptor implements NestInterceptor {
             response.statusCode >= 200 && response.statusCode <= 299,
           action: auditAction,
           resource: auditResource,
-          userAgent: request.get("user-agent") || "",
+          userAgent: request.get('user-agent') || '',
           ip: request.ip,
           userId: user.id,
         };
@@ -70,7 +70,7 @@ export class AuditInterceptor implements NestInterceptor {
           failureReason,
           action: auditAction,
           resource: auditResource,
-          userAgent: request.get("user-agent") || "",
+          userAgent: request.get('user-agent') || '',
           ip: request.ip,
           userId: user.id,
         };

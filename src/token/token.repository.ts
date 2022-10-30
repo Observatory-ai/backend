@@ -1,7 +1,7 @@
-import { DateUtil } from '../utils/date.util';
 import { EntityRepository, LessThanOrEqual, Repository } from 'typeorm';
+import { DateUtil } from '../utils/date.util';
+import { CreateTokenDto } from './dtos/create-token.dto';
 import { Token } from './token.entity';
-import { CreateTokenDto } from './dto/create-token.dto';
 
 @EntityRepository(Token)
 export class TokenRepository extends Repository<Token> {

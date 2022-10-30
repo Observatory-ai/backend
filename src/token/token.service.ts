@@ -1,12 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
-import { TokenNotFoundException } from '../exception/token-not-found.exception';
 import { TokenExpiredException } from '../exception/token-expired.exception';
+import { TokenNotFoundException } from '../exception/token-not-found.exception';
+import { CreateTokenDto } from './dtos/create-token.dto';
 import { Token } from './token.entity';
 import { TokenRepository } from './token.repository';
-import { DateUtil } from '../utils/date.util';
-import { CreateTokenDto } from './dto/create-token.dto';
 
 @Injectable()
 export class TokenService {

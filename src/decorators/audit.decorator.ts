@@ -1,7 +1,7 @@
-import { applyDecorators, UseInterceptors, SetMetadata } from '@nestjs/common';
+import { applyDecorators, SetMetadata, UseInterceptors } from '@nestjs/common';
+import { AuditActionDto } from '../audit/enums/audit-action.enum';
+import { AuditResourceDto } from '../audit/enums/audit-resource.enum';
 import { AuditInterceptor } from '../interceptors/audit.interceptor';
-import { AuditActionDto } from '../audit/enum/audit-action.enum';
-import { AuditResourceDto } from '../audit/enum/audit-resource.enum';
 
 /**
  * The audit action metadata key, used to extract the audit action from a method

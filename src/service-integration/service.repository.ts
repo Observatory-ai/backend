@@ -1,7 +1,7 @@
 import { EntityRepository, Repository } from 'typeorm';
-import { Service } from './service.entity';
-import { CreateServiceDto } from './dto/create-service.dto';
+import { CreateServiceDto } from './dtos/create-service.dto';
 import { ServiceType } from './enum/service-type.enum';
+import { Service } from './service.entity';
 
 @EntityRepository(Service)
 export class ServiceRepository extends Repository<Service> {

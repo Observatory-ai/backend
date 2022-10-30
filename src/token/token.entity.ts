@@ -1,14 +1,14 @@
 import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
   BaseEntity,
+  Column,
+  Entity,
+  Index,
   JoinColumn,
   ManyToOne,
-  Index,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from '../user/user.entity';
-import { TokenType } from './enum/token-type.enum';
+import { TokenType } from './enums/token-type.enum';
 
 @Entity()
 export class Token extends BaseEntity {

@@ -1,4 +1,4 @@
-import { TokenType } from '../enum/token-type.enum';
+import { TokenType } from '../enums/token-type.enum';
 
 export class CreateTokenDto {
   uuid: string;

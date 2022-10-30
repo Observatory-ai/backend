@@ -1,15 +1,15 @@
-import { User } from '../user/user.entity';
 import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
   BaseEntity,
-  ManyToOne,
+  Column,
+  CreateDateColumn,
+  Entity,
   JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
-import { AuditActionDto } from './enum/audit-action.enum';
-import { AuditResourceDto } from './enum/audit-resource.enum';
+import { User } from '../user/user.entity';
+import { AuditActionDto } from './enums/audit-action.enum';
+import { AuditResourceDto } from './enums/audit-resource.enum';
 
 @Entity()
 export class AuditLog extends BaseEntity {

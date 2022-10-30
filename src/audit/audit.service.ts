@@ -3,7 +3,7 @@ import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AuditLog } from './audit-log.entity';
 import { AuditRepository } from './audit.repository';
-import { CreateAuditLogDto } from './dto/create-audit-log.dto';
+import { CreateAuditLogDto } from './dtos/create-audit-log.dto';
 
 @Injectable()
 export class AuditService {

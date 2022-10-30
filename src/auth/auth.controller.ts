@@ -19,14 +19,14 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Request as ExpressRequest } from 'express';
-import { AuditActionDto } from '../audit/enum/audit-action.enum';
-import { AuditResourceDto } from '../audit/enum/audit-resource.enum';
+import { AuditActionDto } from '../audit/enums/audit-action.enum';
+import { AuditResourceDto } from '../audit/enums/audit-resource.enum';
 import { Audit } from '../decorators/audit.decorator';
 import { ReqUser } from '../decorators/user.decorator';
-import { ExceptionDto } from '../exception/dto/exception.dto';
-import { CreateUserDto } from '../user/dto/create-user.dto';
-import { AuthMethod } from '../user/enum/auth-method.enum';
-import { Locale } from '../user/enum/locale.enum';
+import { ExceptionDto } from '../exception/dtos/exception.dto';
+import { CreateUserDto } from '../user/dtos/create-user.dto';
+import { AuthMethod } from '../user/enums/auth-method.enum';
+import { Locale } from '../user/enums/locale.enum';
 import { User } from '../user/user.entity';
 import { RequestWithAccessToken } from '../utils/requests.interface';
 import { AuthService } from './auth.service';

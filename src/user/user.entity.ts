@@ -8,13 +8,13 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
-} from "typeorm";
-import { AuditLog } from "../audit/audit-log.entity";
-import { AuthToken } from "../auth/auth-token.entity";
-import { Service } from "../service-integration/service.entity";
-import { Token } from "../token/token.entity";
-import { AuthMethod } from "./enum/auth-method.enum";
-import { Locale } from "./enum/locale.enum";
+} from 'typeorm';
+import { AuditLog } from '../audit/audit-log.entity';
+import { AuthToken } from '../auth/auth-token.entity';
+import { Service } from '../service-integration/service.entity';
+import { Token } from '../token/token.entity';
+import { AuthMethod } from './enums/auth-method.enum';
+import { Locale } from './enums/locale.enum';
 
 @Entity()
 export class User extends BaseEntity {
@@ -22,7 +22,7 @@ export class User extends BaseEntity {
   id: number;
 
   @Index({ unique: true })
-  @Column({ type: "uuid", unique: true, nullable: false })
+  @Column({ type: 'uuid', unique: true, nullable: false })
   uuid: string;
 
   @Column({ unique: true, nullable: true })
@@ -53,10 +53,10 @@ export class User extends BaseEntity {
   @Column({ nullable: true })
   lastName: string;
 
-  @Column({ type: "enum", enum: AuthMethod, nullable: false })
+  @Column({ type: 'enum', enum: AuthMethod, nullable: false })
   authMethod: AuthMethod;
 
-  @Column({ type: "enum", enum: Locale, nullable: true })
+  @Column({ type: 'enum', enum: Locale, nullable: true })
   locale: Locale;
 
   @OneToMany(() => Token, (token) => token.user)

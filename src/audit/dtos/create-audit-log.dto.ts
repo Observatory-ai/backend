@@ -1,5 +1,5 @@
-import { AuditActionDto } from '../enum/audit-action.enum';
-import { AuditResourceDto } from '../enum/audit-resource.enum';
+import { AuditActionDto } from '../enums/audit-action.enum';
+import { AuditResourceDto } from '../enums/audit-resource.enum';
 
 export declare class CreateAuditLogDto {
   isSuccessful: boolean;
