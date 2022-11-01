@@ -24,7 +24,11 @@ export class GoogleCalendarService {
     const clientSecret =
       this.configService.get<GoogleConfig>('google').authClientSecret;
 
-    this.oauthClient = new google.auth.OAuth2(clientID, clientSecret);
+    this.oauthClient = new google.auth.OAuth2(
+      clientID,
+      clientSecret,
+      'postmessage',
+    );
   }
 
   /**
@@ -37,11 +41,8 @@ export class GoogleCalendarService {
     googleCalendarActivationDto: GoogleCalendarActivationDto,
     user: User,
   ): Promise<UserResponseDto> {
-    // let query = url.parse(request.url, true).query;
-    // if (query.error) throw new UnauthorizedException();
-
     let { tokens } = await this.oauthClient.getToken(
-      googleCalendarActivationDto.accessToken,
+      googleCalendarActivationDto.activationCode,
     );
     this.setGoogleClientTokens(tokens.refresh_token, tokens.access_token);
 

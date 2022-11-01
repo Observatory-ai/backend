@@ -1,6 +1,5 @@
-import { Body, Controller, Get, Request, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { ApiCookieAuth, ApiTags } from '@nestjs/swagger';
-import { Request as ExpressRequest } from 'express';
 import { UserResponseDto } from '../auth/dtos/responses/user-response.dto';
 import { JwtAuthenticationGuard } from '../auth/guards/jwt-authentication.guard';
 import { ReqUser } from '../decorators/user.decorator';
@@ -13,16 +12,7 @@ import { GoogleCalendarService } from './google-calendar.service';
 export class GoogleCalendarController {
   constructor(private readonly googleCalendarService: GoogleCalendarService) {}
 
-  // @Get('activate')
-  // @UseGuards(JwtAuthenticationGuard)
-  // async googleCalendar(
-  //   @Request() request: ExpressRequest,
-  //   @ReqUser() user: User,
-  // ): Promise<void> {
-  //   return this.googleCalendarService.requestService(user, request);
-  // }
-
-  @Get('activate')
+  @Post('activate')
   @UseGuards(JwtAuthenticationGuard)
   googleCalendarActivate(
     @Body() googleCalendarActivationDto: GoogleCalendarActivationDto,

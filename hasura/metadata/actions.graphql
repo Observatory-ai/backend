@@ -5,6 +5,12 @@ type Mutation {
 }
 
 type Mutation {
+  googleCalendarActivation(
+    googleCalendarActivationInput: GoogleCalendarActivationInput!
+  ): Void
+}
+
+type Mutation {
   login(
     loginInput: LoginInput!
   ): AuthOutput
@@ -40,6 +46,10 @@ input RegisterInput {
 
 input GoogleAuthInput {
   accessToken: String
+}
+
+input GoogleCalendarActivationInput {
+  activationCode: String
 }
 
 type AuthOutput {

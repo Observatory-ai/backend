@@ -16,6 +16,24 @@ actions:
         url: '{{$base_url}}/api/auth/google/authenticate'
         version: 2
     comment: google auth
+  - name: googleCalendarActivation
+    definition:
+      kind: synchronous
+      handler: http://host.docker.internal:3000
+      forward_client_headers: true
+      request_transform:
+        body:
+          action: transform
+          template: |-
+            {
+              "activationCode": {{$body.input.googleCalendarActivationInput.activationCode}}
+            }
+        method: POST
+        query_params: {}
+        template_engine: Kriti
+        url: '{{$base_url}}/api/google-calendar/activate'
+        version: 2
+    comment: google calendar activation
   - name: login
     definition:
       kind: synchronous
@@ -94,6 +112,7 @@ custom_types:
     - name: LoginInput
     - name: RegisterInput
     - name: GoogleAuthInput
+    - name: GoogleCalendarActivationInput
   objects:
     - name: AuthOutput
   scalars:
