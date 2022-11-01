@@ -3,6 +3,7 @@ actions:
     definition:
       kind: synchronous
       handler: http://host.docker.internal:3000
+      forward_client_headers: true
       request_transform:
         body:
           action: transform
@@ -34,6 +35,25 @@ actions:
         url: '{{$base_url}}/api/google-calendar/activate'
         version: 2
     comment: google calendar activation
+  - name: googleCalendarEvents
+    definition:
+      kind: ""
+      handler: http://host.docker.internal:3000
+      forward_client_headers: true
+      request_transform:
+        body:
+          action: transform
+          template: '{}'
+        method: GET
+        query_params: {}
+        request_headers:
+          add_headers: {}
+          remove_headers:
+            - content-type
+        template_engine: Kriti
+        url: '{{$base_url}}/api/google-calendar/events'
+        version: 2
+    comment: google calendar events
   - name: login
     definition:
       kind: synchronous
@@ -115,5 +135,13 @@ custom_types:
     - name: GoogleCalendarActivationInput
   objects:
     - name: AuthOutput
+    - name: Reminders
+    - name: End
+    - name: Start
+    - name: Organizer
+    - name: Creator
+    - name: Items
+    - name: DefaultReminders
+    - name: GoogleCalendarEventsOutput
   scalars:
     - name: Void

@@ -1,7 +1,5 @@
 type Mutation {
-  googleAuth(
-    googleAuthInput: GoogleAuthInput!
-  ): AuthOutput
+  googleAuth(googleAuthInput: GoogleAuthInput!): AuthOutput
 }
 
 type Mutation {
@@ -11,9 +9,11 @@ type Mutation {
 }
 
 type Mutation {
-  login(
-    loginInput: LoginInput!
-  ): AuthOutput
+  googleCalendarEvents: GoogleCalendarEventsOutput
+}
+
+type Mutation {
+  login(loginInput: LoginInput!): AuthOutput
 }
 
 type Mutation {
@@ -25,9 +25,7 @@ type Mutation {
 }
 
 type Mutation {
-  register(
-    registerInput: RegisterInput!
-  ): AuthOutput
+  register(registerInput: RegisterInput!): AuthOutput
 }
 
 input LoginInput {
@@ -59,5 +57,65 @@ type AuthOutput {
   username: String!
 }
 
-scalar Void
+type Reminders {
+  useDefault: Boolean
+}
 
+type End {
+  dateTime: String
+  timeZone: String
+}
+
+type Start {
+  dateTime: String
+  timeZone: String
+}
+
+type Organizer {
+  email: String
+  displayName: String
+  self: Boolean
+}
+
+type Creator {
+  email: String
+  displayName: String
+  self: Boolean
+}
+
+type Items {
+  kind: String
+  etag: String
+  id: String
+  status: String
+  htmlLink: String
+  created: String
+  updated: String
+  summary: String
+  iCalUID: String
+  sequence: Int
+  eventType: String
+  reminders: Reminders
+  end: End
+  start: Start
+  organizer: Organizer
+  creator: Creator
+}
+
+type DefaultReminders {
+  method: String
+  minutes: Int
+}
+
+type GoogleCalendarEventsOutput {
+  kind: String
+  etag: String
+  summary: String
+  updated: String
+  timeZone: String
+  accessRole: String
+  items: [Items]
+  defaultReminders: [DefaultReminders]
+}
+
+scalar Void
