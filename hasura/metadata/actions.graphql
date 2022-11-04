@@ -1,5 +1,7 @@
 type Mutation {
-  googleAuth(googleAuthInput: GoogleAuthInput!): AuthOutput
+  googleAuth(
+    googleAuthInput: GoogleAuthInput!
+  ): AuthOutput
 }
 
 type Mutation {
@@ -8,12 +10,14 @@ type Mutation {
   ): Void
 }
 
-type Mutation {
+type Query {
   googleCalendarEvents: GoogleCalendarEventsOutput
 }
 
 type Mutation {
-  login(loginInput: LoginInput!): AuthOutput
+  login(
+    loginInput: LoginInput!
+  ): AuthOutput
 }
 
 type Mutation {
@@ -25,7 +29,9 @@ type Mutation {
 }
 
 type Mutation {
-  register(registerInput: RegisterInput!): AuthOutput
+  register(
+    registerInput: RegisterInput!
+  ): AuthOutput
 }
 
 input LoginInput {
@@ -119,3 +125,4 @@ type GoogleCalendarEventsOutput {
 }
 
 scalar Void
+
