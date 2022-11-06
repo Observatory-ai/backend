@@ -11,7 +11,9 @@ type Mutation {
 }
 
 type Query {
-  googleCalendarEvents: GoogleCalendarEventsOutput
+  googleCalendarEvents(
+    googleCalendarEventsInput: GoogleCalendarEventsInput!
+  ): GoogleCalendarEventsOutput
 }
 
 type Mutation {
@@ -54,6 +56,13 @@ input GoogleAuthInput {
 
 input GoogleCalendarActivationInput {
   activationCode: String
+}
+
+input GoogleCalendarEventsInput {
+  timeMin: String
+  timeMax: String
+  orderBy: String
+  singleEvents: Boolean
 }
 
 type AuthOutput {

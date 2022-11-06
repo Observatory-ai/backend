@@ -10,6 +10,7 @@ import { ServiceType } from '../service-integration/enum/service-type.enum';
 import { ServiceIntegrationService } from '../service-integration/service-integration.service';
 import { User } from '../user/user.entity';
 import { GoogleCalendarActivationDto } from './dtos/google-calendar-activation.dto';
+import { GoogleCalendarEventsDto } from './dtos/google-calendar-events.dto';
 const url = require('url');
 
 @Injectable()
@@ -88,7 +89,10 @@ export class GoogleCalendarService {
     return userResponseDto;
   }
 
-  async getCalendarEvents(user: User): Promise<any> {
+  async getCalendarEvents(
+    user: User,
+    googleCalendarEventsDto: GoogleCalendarEventsDto,
+  ): Promise<any> {
     const { refreshToken } = await this.serviceIntegrationService.getService(
       user.id,
       ServiceType.google,
@@ -96,7 +100,7 @@ export class GoogleCalendarService {
     this.oauthClient.setCredentials({
       refresh_token: refreshToken,
     });
-    const events = await this.getUserCalendarEvents();
+    const events = await this.getUserCalendarEvents(googleCalendarEventsDto);
     return events;
   }
 
@@ -118,10 +122,17 @@ export class GoogleCalendarService {
    * Get the user google calendar events on main calendar
    * @param accessToken the user's access token
    */
-  async getUserCalendarEvents(): Promise<any> {
+  async getUserCalendarEvents(
+    googleCalendarEventsDto: GoogleCalendarEventsDto,
+  ): Promise<any> {
+    const { timeMax, timeMin, orderBy, singleEvents } = googleCalendarEventsDto;
     const service = google.calendar({ version: 'v3', auth: this.oauthClient });
     const res = await service.events.list({
       calendarId: 'primary',
+      timeMin,
+      timeMax,
+      orderBy,
+      singleEvents,
     });
     return res.data;
   }

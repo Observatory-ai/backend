@@ -5,6 +5,7 @@ import { JwtAuthenticationGuard } from '../auth/guards/jwt-authentication.guard'
 import { ReqUser } from '../decorators/user.decorator';
 import { User } from '../user/user.entity';
 import { GoogleCalendarActivationDto } from './dtos/google-calendar-activation.dto';
+import { GoogleCalendarEventsDto } from './dtos/google-calendar-events.dto';
 import { GoogleCalendarService } from './google-calendar.service';
 
 @Controller('api/google-calendar')
@@ -27,7 +28,14 @@ export class GoogleCalendarController {
   @Get('events')
   @UseGuards(JwtAuthenticationGuard)
   @ApiCookieAuth()
-  getCalendarEvents(@ReqUser() user: any): Promise<any> {
-    return this.googleCalendarService.getCalendarEvents(user);
+  getCalendarEvents(
+    @Body() googleCalendarEventsDto: GoogleCalendarEventsDto,
+    @ReqUser() user: any,
+  ): Promise<any> {
+    console.log('vewbvuywevbue', googleCalendarEventsDto);
+    return this.googleCalendarService.getCalendarEvents(
+      user,
+      googleCalendarEventsDto,
+    );
   }
 }

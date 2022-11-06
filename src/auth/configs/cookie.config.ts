@@ -29,7 +29,7 @@ const COOKIE_CONFIG: Record<AuthTokenType, CookieConfig> = {
       path: '/',
     },
     // 15 minutes
-    expirationTime: 900,
+    expirationTime: 9000000,
   },
   REFRESH: {
     name: 'jwt',
