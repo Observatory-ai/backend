@@ -1,11 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Post,
-  Request,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -28,7 +21,6 @@ import { CreateUserDto } from '../user/dtos/create-user.dto';
 import { AuthMethod } from '../user/enums/auth-method.enum';
 import { Locale } from '../user/enums/locale.enum';
 import { User } from '../user/user.entity';
-import { RequestWithAccessToken } from '../utils/requests.interface';
 import { AuthService } from './auth.service';
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { ForgotPasswordDto } from './dtos/forgot-password.dto';
@@ -112,15 +104,6 @@ export class AuthController {
     @ReqUser() user: User,
   ): Promise<UserResponseDto> {
     return this.authService.logIn(user, request);
-  }
-
-  @Get('test')
-  @UseGuards(JwtAuthenticationGuard)
-  async test(
-    @Request() request: RequestWithAccessToken,
-    @ReqUser() user: User,
-  ): Promise<any> {
-    return { user, accessToken: request.accessToken };
   }
 
   /**

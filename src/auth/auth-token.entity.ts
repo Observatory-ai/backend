@@ -1,12 +1,15 @@
 import {
   BaseEntity,
   Column,
+  CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
-} from "typeorm";
-import { User } from "../user/user.entity";
+  UpdateDateColumn,
+} from 'typeorm';
+import { User } from '../user/user.entity';
 
 @Entity()
 export class AuthToken extends BaseEntity {
@@ -17,7 +20,7 @@ export class AuthToken extends BaseEntity {
   userId: number;
 
   @ManyToOne(() => User, (user) => user.tokens)
-  @JoinColumn({ name: "userId" })
+  @JoinColumn({ name: 'userId' })
   user: User;
 
   @Column({ nullable: false })
@@ -28,4 +31,13 @@ export class AuthToken extends BaseEntity {
 
   @Column({ nullable: false })
   userAgent: string;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date;
 }
