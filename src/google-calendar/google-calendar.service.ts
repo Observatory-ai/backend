@@ -119,9 +119,18 @@ export class GoogleCalendarService {
    * @param accessToken the user's access token
    */
   async getUserCalendarEvents(): Promise<any> {
+    const startOfTheWeek = new Date();
+    startOfTheWeek.setDate(startOfTheWeek.getDate() - startOfTheWeek.getDay());
+    const endOfTheWeek = new Date();
+    endOfTheWeek.setDate(endOfTheWeek.getDate() - endOfTheWeek.getDay() + 7);
+
     const service = google.calendar({ version: 'v3', auth: this.oauthClient });
     const res = await service.events.list({
       calendarId: 'primary',
+      timeMin: startOfTheWeek.toISOString(),
+      timeMax: endOfTheWeek.toISOString(),
+      orderBy: 'startTime',
+      singleEvents: true,
     });
     return res.data;
   }
