@@ -5,6 +5,6 @@ import { BadRequestException } from '@nestjs/common';
  */
 export class EmailInUseException extends BadRequestException {
   constructor() {
-    super(`This email is already linked to another account`);
+    super(`email:EMAIL_IN_USE`);
   }
 }

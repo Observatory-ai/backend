@@ -5,6 +5,6 @@ import { BadRequestException } from '@nestjs/common';
  */
 export class UsernameInUseException extends BadRequestException {
   constructor() {
-    super(`This username is already being used by another account`);
+    super(`username:USERNAME_IN_USE`);
   }
 }

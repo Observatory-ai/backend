@@ -1,12 +1,13 @@
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { AuthTokenType, COOKIE_CONFIG } from './auth/configs/cookie.config';
 import { Config, EnvironmentConfig } from './config/configuration.interface';
+import { AllExceptionsFilter } from './filters/all-exceptions.filter';
 import { LoggerService } from './logger/logger.service';
 const helmet = require('helmet');
 
@@ -25,6 +26,8 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  const httpAdapter = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new AllExceptionsFilter(httpAdapter));
   app.use(cookieParser());
   app.set('trust proxy', 1);
 

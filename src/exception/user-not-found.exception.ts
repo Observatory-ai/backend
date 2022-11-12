@@ -1,4 +1,4 @@
-import { NotFoundException } from "@nestjs/common";
+import { NotFoundException } from '@nestjs/common';
 
 /**
  * An exception that is thrown when the user with the give email
@@ -6,7 +6,7 @@ import { NotFoundException } from "@nestjs/common";
  */
 export class UserNotFoundException extends NotFoundException {
   constructor(email: string) {
-    super(`User with email or username ${email} not found`);
+    super(`general:User with email or username ${email} not found`);
   }
 }
 
@@ -16,6 +16,6 @@ export class UserNotFoundException extends NotFoundException {
  */
 export class UserWithIdNotFoundException extends NotFoundException {
   constructor(id: string | number) {
-    super(`User with id ${id} not found`);
+    super(`general:User with id ${id} not found`);
   }
 }
