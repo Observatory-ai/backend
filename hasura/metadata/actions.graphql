@@ -1,7 +1,5 @@
 type Mutation {
-  googleAuth(
-    googleAuthInput: GoogleAuthInput!
-  ): AuthOutput
+  googleAuth(googleAuthInput: GoogleAuthInput!): AuthOutput
 }
 
 type Mutation {
@@ -15,9 +13,7 @@ type Query {
 }
 
 type Mutation {
-  login(
-    loginInput: LoginInput!
-  ): AuthOutput
+  login(loginInput: LoginInput!): AuthOutput
 }
 
 type Mutation {
@@ -29,9 +25,7 @@ type Mutation {
 }
 
 type Mutation {
-  register(
-    registerInput: RegisterInput!
-  ): AuthOutput
+  register(registerInput: RegisterInput!): AuthOutput
 }
 
 input LoginInput {
@@ -106,6 +100,20 @@ type Items {
   start: Start
   organizer: Organizer
   creator: Creator
+  attendees: [Attendees]
+}
+
+type Attendees {
+  id: String
+  email: String
+  displayName: String
+  organizer: Boolean
+  self: Boolean
+  resource: Boolean
+  optional: Boolean
+  responseStatus: String
+  comment: String
+  additionalGuests: Int
 }
 
 type DefaultReminders {
@@ -125,4 +133,3 @@ type GoogleCalendarEventsOutput {
 }
 
 scalar Void
-

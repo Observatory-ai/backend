@@ -97,7 +97,9 @@ export class GoogleCalendarService {
       refresh_token: refreshToken,
     });
     const events = await this.getUserCalendarEvents();
-    return events;
+    const weeklyTrends = await this.getWeeklyTrends();
+    const allEvents = { barChart: events, lineChart: weeklyTrends };
+    return weeklyTrends;
   }
 
   /**
@@ -112,6 +114,22 @@ export class GoogleCalendarService {
       access_token: accessToken,
       refresh_token: refreshToken,
     });
+  }
+
+  async getWeeklyTrends(): Promise<any> {
+    const today = new Date();
+    const startOfTheWeek = new Date(new Date().setDate(today.getDate() - 90));
+    const endOfTheWeek = new Date();
+    endOfTheWeek.setDate(endOfTheWeek.getDate() - endOfTheWeek.getDay() + 6);
+    const service = google.calendar({ version: 'v3', auth: this.oauthClient });
+    const res = await service.events.list({
+      calendarId: 'primary',
+      timeMin: startOfTheWeek.toISOString(),
+      timeMax: endOfTheWeek.toISOString(),
+      orderBy: 'startTime',
+      singleEvents: true,
+    });
+    return res.data;
   }
 
   /**
@@ -132,6 +150,7 @@ export class GoogleCalendarService {
       orderBy: 'startTime',
       singleEvents: true,
     });
+    console.log(res.data);
     return res.data;
   }
 }
