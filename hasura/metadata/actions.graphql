@@ -61,6 +61,7 @@ type AuthOutput {
   uuid: String!
   email: String!
   username: String!
+  avatar: String
 }
 
 type Reminders {

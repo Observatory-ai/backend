@@ -45,17 +45,16 @@ export class GoogleCalendarService {
       googleCalendarActivationDto.activationCode,
     );
     this.setGoogleClientTokens(tokens.refresh_token, tokens.access_token);
-
     if (
       await this.serviceIntegrationService.doesExists(
         ServiceType.google,
         user.id,
       )
     ) {
-      if (!!tokens.refresh_token) {
+      if (tokens.refresh_token) {
         let { apis } = await this.serviceIntegrationService.getService(
-          ServiceType.google,
           user.id,
+          ServiceType.google,
         );
         if (apis.includes(Api.Google_Calendar)) {
           await this.serviceIntegrationService.updateRefreshToken(

@@ -1,5 +1,5 @@
-import { Exclude, Expose } from "class-transformer";
-import { IsNumber, IsString } from "class-validator";
+import { Exclude, Expose } from 'class-transformer';
+import { IsNumber, IsString } from 'class-validator';
 
 @Exclude()
 export class UserResponseDto {
@@ -18,4 +18,8 @@ export class UserResponseDto {
   @Expose()
   @IsString()
   accessToken: string;
+
+  @Expose()
+  @IsString()
+  avatar: string;
 }
