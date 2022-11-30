@@ -81,7 +81,6 @@ export class GoogleCalendarService {
         apis: [Api.Google_Calendar],
         isActive: true,
       };
-
       this.serviceIntegrationService.create(service);
     }
     const userResponseDto = plainToClass(UserResponseDto, user);
@@ -98,6 +97,7 @@ export class GoogleCalendarService {
     });
     const events = await this.getUserCalendarEvents();
     const weeklyTrends = await this.getWeeklyTrends();
+    // console.log(weeklyTrends);
     const allEvents = { barChart: events, lineChart: weeklyTrends };
     return weeklyTrends;
   }
@@ -116,11 +116,33 @@ export class GoogleCalendarService {
     });
   }
 
+  // Make output format with Hasura
+  // can't be used as of now
+  // async getFreeBusy(): Promise<any> {
+  //   const today = new Date();
+  //   const startOfTheWeek = new Date(
+  //     new Date().setDate(today.getDate() - today.getDay()),
+  //   );
+  //   const endOfTheWeek = new Date(
+  //     today.setDate(today.getDate() - today.getDay() + 6),
+  //   );
+  //   const service = google.calendar({ version: 'v3', auth: this.oauthClient });
+  //   const res = await service.freebusy.query({
+  //     requestBody: {
+  //       timeMin: startOfTheWeek.toISOString(),
+  //       timeMax: endOfTheWeek.toISOString(),
+  //       items: [{ id: 'primary' }],
+  //     },
+  //   });
+  //   return res.data;
+  // }
+
   async getWeeklyTrends(): Promise<any> {
     const today = new Date();
-    const startOfTheWeek = new Date(new Date().setDate(today.getDate() - 90));
-    const endOfTheWeek = new Date();
-    endOfTheWeek.setDate(endOfTheWeek.getDate() - endOfTheWeek.getDay() + 6);
+    const startOfTheWeek = new Date(new Date().setDate(today.getDate() - 30));
+    const endOfTheWeek = new Date(
+      today.setDate(today.getDate() - today.getDay() + 6),
+    );
     const service = google.calendar({ version: 'v3', auth: this.oauthClient });
     const res = await service.events.list({
       calendarId: 'primary',
@@ -150,7 +172,6 @@ export class GoogleCalendarService {
       orderBy: 'startTime',
       singleEvents: true,
     });
-    console.log(res.data);
     return res.data;
   }
 }
