@@ -196,7 +196,7 @@ export class AuthService {
     response.cookie(name, refreshToken, {
       ...cookieOptions,
       maxAge: expirationTime * 1000,
-      domain: 'localhost', // this.domain
+      domain: this.domain,
     });
   }
 
@@ -209,7 +209,7 @@ export class AuthService {
     response.clearCookie(name, {
       ...cookieOptions,
       maxAge: expirationTime * 1000,
-      domain: 'localhost', // this.domain
+      domain: this.domain,
     });
   }
 

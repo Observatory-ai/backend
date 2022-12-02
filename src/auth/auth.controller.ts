@@ -1,4 +1,11 @@
-import { Body, Controller, Post, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import {
   ApiBadRequestResponse,
   ApiBody,
@@ -219,5 +226,10 @@ export class AuthController {
     @Body() verifyAccountDto: VerifyAccountDto,
   ): Promise<void> {
     return this.authService.verifyAccount(verifyAccountDto);
+  }
+
+  @Get('test')
+  test() {
+    return 'API works';
   }
 }

@@ -6,7 +6,7 @@ import { NotFoundException } from '@nestjs/common';
  */
 export class UserNotFoundException extends NotFoundException {
   constructor(email: string) {
-    super(`general:User with email or username ${email} not found`);
+    super(`usernameOrEmail:User with email or username ${email} not found`);
   }
 }
 
