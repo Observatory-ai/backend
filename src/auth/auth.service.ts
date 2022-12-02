@@ -1,15 +1,18 @@
 import {
   Injectable,
   InternalServerErrorException,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
 import { plainToInstance } from 'class-transformer';
 import { Request as ExpressRequest } from 'express';
 import { v4 } from 'uuid';
+import { AuditService } from '../audit/audit.service';
 import { Config, JwtConfig } from '../config/configuration.interface';
 import { InvalidCredentialsException } from '../exception/invalid-credentials.exception';
 import { SamePasswordException } from '../exception/same-password.exception';
@@ -44,6 +47,7 @@ import { TokenPayload } from './interfaces/token-payload.interface';
 
 @Injectable()
 export class AuthService {
+  private readonly logger: Logger = new Logger(AuditService.name);
   private readonly jwtConfig: JwtConfig;
   private readonly domain: string;
   private readonly accessCookieConfig: CookieConfig =
@@ -512,5 +516,20 @@ export class AuthService {
       hashedPassword,
     );
     return passwordsMatch;
+  }
+
+  // create cron job to delete expired refresh tokens from the database
+  /**
+   * Cron job that runs every hour and deletes audit logs that have been
+   * created 28 days ago or greater
+   */
+  @Cron(CronExpression.EVERY_DAY_AT_MIDNIGHT)
+  private async deleteExpiredAuditLogsJob(): Promise<void> {
+    this.logger.log('Delete expired auth tokens cron job running');
+    const deletedCount =
+      await this.authTokenRepository.deleteExpiredAuthTokens();
+    this.logger.log(
+      `Delete expired auth tokens cron job finished - ${deletedCount} auth tokens deleted`,
+    );
   }
 }

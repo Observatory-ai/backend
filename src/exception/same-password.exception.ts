@@ -5,6 +5,6 @@ import { BadRequestException } from '@nestjs/common';
  */
 export class SamePasswordException extends BadRequestException {
   constructor() {
-    super(`The new password can not match the old password`);
+    super(`password:PASSWORD_SAME`);
   }
 }
