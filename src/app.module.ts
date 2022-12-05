@@ -91,7 +91,11 @@ const Joi = require('joi');
           configService.get<DatabaseConfig>('database');
         return {
           type: 'postgres',
-          url: databaseConfig.databaseUrl,
+          host: databaseConfig.databaseHost,
+          port: databaseConfig.databasePort,
+          username: databaseConfig.databaseUsername,
+          password: databaseConfig.databasePassword,
+          database: databaseConfig.databaseName,
           entities: [__dirname + '/**/*.entity{.ts,.js}'],
           synchronize: true,
           logging: true,
