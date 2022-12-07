@@ -80,7 +80,6 @@ export class GoogleCalendarService {
         apis: [Api.Google_Calendar],
         isActive: true,
       };
-
       this.serviceIntegrationService.create(service);
     }
     const userResponseDto = plainToClass(UserResponseDto, user);
@@ -95,8 +94,8 @@ export class GoogleCalendarService {
     this.oauthClient.setCredentials({
       refresh_token: refreshToken,
     });
-    const events = await this.getUserCalendarEvents();
-    return events;
+    const weeklyTrends = await this.getWeeklyTrends();
+    return weeklyTrends;
   }
 
   /**
@@ -113,14 +112,61 @@ export class GoogleCalendarService {
     });
   }
 
+  // Make output format with Hasura
+  // can't be used as of now
+  // async getFreeBusy(): Promise<any> {
+  //   const today = new Date();
+  //   const startOfTheWeek = new Date(
+  //     new Date().setDate(today.getDate() - today.getDay()),
+  //   );
+  //   const endOfTheWeek = new Date(
+  //     today.setDate(today.getDate() - today.getDay() + 6),
+  //   );
+  //   const service = google.calendar({ version: 'v3', auth: this.oauthClient });
+  //   const res = await service.freebusy.query({
+  //     requestBody: {
+  //       timeMin: startOfTheWeek.toISOString(),
+  //       timeMax: endOfTheWeek.toISOString(),
+  //       items: [{ id: 'primary' }],
+  //     },
+  //   });
+  //   return res.data;
+  // }
+
+  async getWeeklyTrends(): Promise<any> {
+    const today = new Date();
+    const startOfTheWeek = new Date(new Date().setDate(today.getDate() - 30));
+    const endOfTheWeek = new Date(
+      today.setDate(today.getDate() - today.getDay() + 6),
+    );
+    const service = google.calendar({ version: 'v3', auth: this.oauthClient });
+    const res = await service.events.list({
+      calendarId: 'primary',
+      timeMin: startOfTheWeek.toISOString(),
+      timeMax: endOfTheWeek.toISOString(),
+      orderBy: 'startTime',
+      singleEvents: true,
+    });
+    return res.data;
+  }
+
   /**
    * Get the user google calendar events on main calendar
    * @param accessToken the user's access token
    */
   async getUserCalendarEvents(): Promise<any> {
+    const startOfTheWeek = new Date();
+    startOfTheWeek.setDate(startOfTheWeek.getDate() - startOfTheWeek.getDay());
+    const endOfTheWeek = new Date();
+    endOfTheWeek.setDate(endOfTheWeek.getDate() - endOfTheWeek.getDay() + 7);
+
     const service = google.calendar({ version: 'v3', auth: this.oauthClient });
     const res = await service.events.list({
       calendarId: 'primary',
+      timeMin: startOfTheWeek.toISOString(),
+      timeMax: endOfTheWeek.toISOString(),
+      orderBy: 'startTime',
+      singleEvents: true,
     });
     return res.data;
   }
