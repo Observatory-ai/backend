@@ -94,10 +94,7 @@ export class GoogleCalendarService {
     this.oauthClient.setCredentials({
       refresh_token: refreshToken,
     });
-    const events = await this.getUserCalendarEvents();
     const weeklyTrends = await this.getWeeklyTrends();
-    // console.log(weeklyTrends);
-    const allEvents = { barChart: events, lineChart: weeklyTrends };
     return weeklyTrends;
   }
 
