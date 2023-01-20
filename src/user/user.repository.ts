@@ -1,7 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 import { EntityRepository, Repository } from 'typeorm';
-import { EmailInUseException } from '../exception/email-in-use.exception';
-import { UsernameInUseException } from '../exception/username-in-use.exception';
+import { EmailInUseException } from '../exceptions/email-in-use.exception';
+import { UsernameInUseException } from '../exceptions/username-in-use.exception';
 import { CreateUserDto } from './dtos/create-user.dto';
 import { UpdateUserDto } from './dtos/update-user.dto';
 import { User } from './user.entity';

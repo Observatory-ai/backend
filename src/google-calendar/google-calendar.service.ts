@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { plainToClass } from 'class-transformer';
 import { Auth, google } from 'googleapis';
-import { UserResponseDto } from '../auth/dtos/responses/user-response.dto';
 import { Config, GoogleConfig } from '../config/configuration.interface';
 import { CreateServiceDto } from '../service-integration/dtos/create-service.dto';
 import { Api } from '../service-integration/enum/api.enum';
@@ -10,7 +8,7 @@ import { ServiceType } from '../service-integration/enum/service-type.enum';
 import { ServiceIntegrationService } from '../service-integration/service-integration.service';
 import { User } from '../user/user.entity';
 import { GoogleCalendarActivationDto } from './dtos/google-calendar-activation.dto';
-const url = require('url');
+import { GoogleCalendarEvents } from './models/google-calendar-events.model';
 
 @Injectable()
 export class GoogleCalendarService {
@@ -40,8 +38,8 @@ export class GoogleCalendarService {
   async activateService(
     googleCalendarActivationDto: GoogleCalendarActivationDto,
     user: User,
-  ): Promise<UserResponseDto> {
-    let { tokens } = await this.oauthClient.getToken(
+  ): Promise<boolean> {
+    const { tokens } = await this.oauthClient.getToken(
       googleCalendarActivationDto.activationCode,
     );
     this.setGoogleClientTokens(tokens.refresh_token, tokens.access_token);
@@ -52,7 +50,7 @@ export class GoogleCalendarService {
       )
     ) {
       if (tokens.refresh_token) {
-        let { apis } = await this.serviceIntegrationService.getService(
+        const { apis } = await this.serviceIntegrationService.getService(
           user.id,
           ServiceType.google,
         );
@@ -83,20 +81,23 @@ export class GoogleCalendarService {
 
       this.serviceIntegrationService.create(service);
     }
-    const userResponseDto = plainToClass(UserResponseDto, user);
-    return userResponseDto;
+    return true;
   }
 
-  async getCalendarEvents(user: User): Promise<any> {
-    const { refreshToken } = await this.serviceIntegrationService.getService(
+  async getCalendarEvents(user: User): Promise<GoogleCalendarEvents | null> {
+    const service = await this.serviceIntegrationService.getService(
       user.id,
       ServiceType.google,
     );
-    this.oauthClient.setCredentials({
-      refresh_token: refreshToken,
-    });
-    const events = await this.getUserCalendarEvents();
-    return events;
+    if (service?.refreshToken) {
+      this.oauthClient.setCredentials({
+        refresh_token: service?.refreshToken,
+      });
+      const events = await this.getUserCalendarEvents();
+
+      return events;
+    }
+    return null;
   }
 
   /**

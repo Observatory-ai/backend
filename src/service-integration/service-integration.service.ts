@@ -31,8 +31,11 @@ export class ServiceIntegrationService {
    * @param service the service requested
    * @returns the service
    */
-  async getService(userId: number, service: ServiceType): Promise<Service> {
-    const createdService: Service =
+  async getService(
+    userId: number,
+    service: ServiceType,
+  ): Promise<Service | undefined> {
+    const createdService =
       await this.serviceRepository.findByUserIdAndServiceType(userId, service);
     return createdService;
   }

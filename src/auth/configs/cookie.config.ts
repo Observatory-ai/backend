@@ -35,9 +35,9 @@ const COOKIE_CONFIG: Record<AuthTokenType, CookieConfig> = {
     name: 'jwt',
     cookieOptions: {
       httpOnly: true,
-      // sameSite: "none",
-      // secure: true,
       path: '/',
+      // sameSite: 'none',
+      // secure: true,
     },
     // 1 week
     expirationTime: 604800, // 604800

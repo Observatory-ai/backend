@@ -2,11 +2,11 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcryptjs';
 import { v4 } from 'uuid';
-import { AccountDisabledException } from '../exception/account-disabled.exception';
+import { AccountDisabledException } from '../exceptions/account-disabled.exception';
 import {
   UserNotFoundException,
   UserWithIdNotFoundException,
-} from '../exception/user-not-found.exception';
+} from '../exceptions/user-not-found.exception';
 import { UserTokenDto } from '../mail/dtos/user-token.dto';
 import { MailService } from '../mail/mail.service';
 import { CreateTokenDto } from '../token/dtos/create-token.dto';

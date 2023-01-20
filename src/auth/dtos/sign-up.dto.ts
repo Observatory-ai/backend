@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { Field, InputType } from '@nestjs/graphql';
 import {
   IsEmail,
   IsNotEmpty,
@@ -9,8 +9,9 @@ import {
 } from 'class-validator';
 import { Match } from '../../decorators/match.decorator';
 
+@InputType()
 export class SignUpDto {
-  @ApiProperty()
+  @Field()
   @IsNotEmpty({
     message: 'email:EMAIL_REQUIRED',
   })
@@ -25,19 +26,19 @@ export class SignUpDto {
   )
   email: string;
 
-  @ApiProperty()
+  @Field()
   @IsNotEmpty({
     message: 'firstName:FIRST_NAME_REQUIRED',
   })
   firstName: string;
 
-  @ApiProperty()
+  @Field()
   @IsNotEmpty({
     message: 'lastName:LAST_NAME_REQUIRED',
   })
   lastName: string;
 
-  @ApiProperty()
+  @Field()
   @IsNotEmpty({
     message: 'username:USERNAME_REQUIRED',
   })
@@ -50,7 +51,7 @@ export class SignUpDto {
   @IsString()
   username: string;
 
-  @ApiProperty()
+  @Field()
   @IsNotEmpty({
     message: 'password:PASSWORD_REQUIRED',
   })
@@ -63,7 +64,7 @@ export class SignUpDto {
   })
   password: string;
 
-  @ApiProperty()
+  @Field()
   @IsNotEmpty({
     message: 'confirmPassword:CONFIRM_PASSWORD_REQUIRED',
   })

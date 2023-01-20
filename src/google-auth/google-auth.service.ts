@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Request as ExpressRequest } from 'express';
 import { Auth, google } from 'googleapis';
 import { AuthService } from '../auth/auth.service';
-import { UserResponseDto } from '../auth/dtos/responses/user-response.dto';
+import { UserResponseDto } from '../auth/models/user-response.model';
 import { Config, GoogleConfig } from '../config/configuration.interface';
 import { CreateUserDto } from '../user/dtos/create-user.dto';
 import { AuthMethod } from '../user/enums/auth-method.enum';
@@ -55,7 +55,7 @@ export class GoogleAuthService {
       return await this.authService.logIn(user, request);
     } else {
       const locale = googleUser.locale.replace(/-/g, '_');
-      let createUserDto: CreateUserDto = {
+      const createUserDto: CreateUserDto = {
         email: googleUser.email,
         username: googleUser.name,
         firstName: googleUser.given_name,

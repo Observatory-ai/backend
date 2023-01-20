@@ -14,8 +14,8 @@ import { Request as ExpressRequest } from 'express';
 import { v4 } from 'uuid';
 import { AuditService } from '../audit/audit.service';
 import { Config, JwtConfig } from '../config/configuration.interface';
-import { InvalidCredentialsException } from '../exception/invalid-credentials.exception';
-import { SamePasswordException } from '../exception/same-password.exception';
+import { InvalidCredentialsException } from '../exceptions/invalid-credentials.exception';
+import { SamePasswordException } from '../exceptions/same-password.exception';
 import { PasswordChangedDto } from '../mail/dtos/password-changed.dto';
 import { UserTokenDto } from '../mail/dtos/user-token.dto';
 import { MailService } from '../mail/mail.service';
@@ -40,10 +40,10 @@ import {
 import { ChangePasswordDto } from './dtos/change-password.dto';
 import { CreateAuthTokenDto } from './dtos/create-auth-token.dto';
 import { ForgotPasswordDto } from './dtos/forgot-password.dto';
-import { UserResponseDto } from './dtos/responses/user-response.dto';
 import { UpdateAuthTokenDto } from './dtos/update-auth-token.dto';
 import { VerifyAccountDto } from './dtos/verify-account.dto';
 import { TokenPayload } from './interfaces/token-payload.interface';
+import { UserResponseDto } from './models/user-response.model';
 
 @Injectable()
 export class AuthService {
@@ -196,7 +196,7 @@ export class AuthService {
     response.cookie(name, refreshToken, {
       ...cookieOptions,
       maxAge: expirationTime * 1000,
-      domain: this.domain,
+      domain: 'localhost', // this.domain,
     });
   }
 
@@ -209,7 +209,7 @@ export class AuthService {
     response.clearCookie(name, {
       ...cookieOptions,
       maxAge: expirationTime * 1000,
-      domain: this.domain,
+      domain: 'localhost', // this.domain
     });
   }
 
@@ -276,7 +276,7 @@ export class AuthService {
    * Trigger the forgot password flow to change a users password
    * @param forgotPasswordDto forgot password details
    */
-  async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<void> {
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto): Promise<boolean> {
     const user: User = await this.userService.findByEmailOrUsername(
       forgotPasswordDto.email,
     );
@@ -294,13 +294,14 @@ export class AuthService {
       token: forgotPasswordToken.uuid,
     };
     this.mailService.handleForgotPassword(userToken);
+    return true;
   }
 
   /**
    * Change a users password
    * @param changePasswordDto password change details
    */
-  async changePassword(changePasswordDto: ChangePasswordDto): Promise<void> {
+  async changePassword(changePasswordDto: ChangePasswordDto): Promise<boolean> {
     const token: Token = await this.tokenService.findOneByUuid(
       changePasswordDto.token,
     );
@@ -323,13 +324,14 @@ export class AuthService {
       user,
     };
     this.mailService.handlePasswordChanged(passwordChanged);
+    return true;
   }
 
   /**
    * Verify a users account
    * @param verifyAccountDto account verification details
    */
-  async verifyAccount(verifyAccountDto: VerifyAccountDto): Promise<void> {
+  async verifyAccount(verifyAccountDto: VerifyAccountDto): Promise<boolean> {
     const token: Token = await this.tokenService.findOneByUuid(
       verifyAccountDto.token,
     );
@@ -341,6 +343,7 @@ export class AuthService {
     }
     this.tokenService.isTokenExpired(token);
     await this.userService.verify(token.userId);
+    return true;
   }
 
   /**

@@ -1,24 +1,31 @@
+import { Field, ObjectType } from '@nestjs/graphql';
 import { Exclude, Expose } from 'class-transformer';
-import { IsNumber, IsString } from 'class-validator';
+import { IsString } from 'class-validator';
 
 @Exclude()
+@ObjectType()
 export class UserResponseDto {
+  @Field()
   @Expose()
-  @IsNumber()
-  uuid: number;
+  @IsString()
+  uuid: string;
 
+  @Field()
   @Expose()
   @IsString()
   email: string;
 
+  @Field()
   @Expose()
   @IsString()
   username: string;
 
+  @Field()
   @Expose()
   @IsString()
   accessToken: string;
 
+  @Field()
   @Expose()
   @IsString()
   avatar: string;

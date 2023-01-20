@@ -1,0 +1,138 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+type UserResponseDto {
+  uuid: String!
+  email: String!
+  username: String!
+  accessToken: String!
+  avatar: String!
+}
+
+type GoogleCalendarEventsDefaultReminders {
+  method: String!
+  minutes: Int!
+}
+
+type GoogleCalendarEventsItemsAttendees {
+  id: String!
+  email: String!
+  displayName: String!
+  organizer: Boolean!
+  self: Boolean!
+  resource: Boolean!
+  optional: Boolean!
+  responseStatus: String!
+  comment: String!
+  additionalGuests: Int!
+}
+
+type GoogleCalendarEventsItemsCreator {
+  email: String!
+  displayName: String!
+  self: Boolean!
+}
+
+type GoogleCalendarEventsItemsEnd {
+  dateTime: String!
+  timeZone: String!
+}
+
+type GoogleCalendarEventsItemsOrganizer {
+  email: String!
+  displayName: String!
+  self: Boolean!
+}
+
+type GoogleCalendarEventsItemsReminders {
+  useDefault: Boolean!
+}
+
+type GoogleCalendarEventsItemsStart {
+  dateTime: String!
+  timeZone: String!
+}
+
+type GoogleCalendarEventsItems {
+  kind: String!
+  etag: String!
+  id: String!
+  status: String!
+  htmlLink: String!
+  created: String!
+  updated: String!
+  summary: String!
+  iCalUID: String!
+  sequence: Int!
+  eventType: String!
+  reminders: GoogleCalendarEventsItemsReminders!
+  end: GoogleCalendarEventsItemsEnd!
+  start: GoogleCalendarEventsItemsStart!
+  organizer: GoogleCalendarEventsItemsOrganizer!
+  creator: GoogleCalendarEventsItemsCreator!
+  attendees: [GoogleCalendarEventsItemsAttendees!]!
+}
+
+type GoogleCalendarEvents {
+  kind: String!
+  etag: String!
+  summary: String!
+  updated: String!
+  timeZone: String!
+  accessRole: String!
+  items: [GoogleCalendarEventsItems!]!
+  defaultReminders: [GoogleCalendarEventsDefaultReminders!]!
+}
+
+type Query {
+  googleCalendarEvents: GoogleCalendarEvents
+}
+
+type Mutation {
+  register(SignUpInput: SignUpDto!): UserResponseDto!
+  login(SignInInput: SignInDto!): UserResponseDto!
+  logout: Boolean!
+  refreshTokens: UserResponseDto!
+  forgotPassword(ForgotPasswordInput: ForgotPasswordDto!): Boolean!
+  changePassword(ChangePasswordInput: ChangePasswordDto!): Boolean!
+  verifyAccount(VerifyAccountInput: VerifyAccountDto!): Boolean!
+  authenticateWithGoogle(GoogleAuthInput: GoogleAuthDto!): UserResponseDto!
+  activateGoogleCalendar(GoogleCalendarActivationInput: GoogleCalendarActivationDto!): Boolean!
+}
+
+input SignUpDto {
+  email: String!
+  firstName: String!
+  lastName: String!
+  username: String!
+  password: String!
+  confirmPassword: String!
+}
+
+input SignInDto {
+  emailOrUsername: String!
+  password: String!
+}
+
+input ForgotPasswordDto {
+  email: String!
+}
+
+input ChangePasswordDto {
+  password: String!
+  confirmPassword: String!
+  token: String!
+}
+
+input VerifyAccountDto {
+  token: String!
+}
+
+input GoogleAuthDto {
+  accessToken: String!
+}
+
+input GoogleCalendarActivationDto {
+  activationCode: String!
+}

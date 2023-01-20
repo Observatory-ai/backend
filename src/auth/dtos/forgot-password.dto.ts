@@ -1,8 +1,9 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { Field, InputType } from '@nestjs/graphql';
 import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
 
+@InputType()
 export class ForgotPasswordDto {
-  @ApiProperty()
+  @Field()
   @IsNotEmpty({
     message: 'Email can not be empty',
   })

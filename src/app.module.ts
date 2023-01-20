@@ -1,9 +1,12 @@
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { GraphQLModule } from '@nestjs/graphql';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { join } from 'path';
 import { AuditModule } from './audit/audit.module';
 import { AuthModule } from './auth/auth.module';
 import configuration from './config/configuration';
@@ -24,6 +27,7 @@ import { TokenModule } from './token/token.module';
 import { UserModule } from './user/user.module';
 import { commaDelimitedLogLevel } from './utils/regex.patterns';
 const Joi = require('joi');
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -38,14 +42,12 @@ const Joi = require('joi');
         LOG_LEVEL: Joi.string()
           .pattern(new RegExp(commaDelimitedLogLevel))
           .default(`${LogLevel.Warn},${LogLevel.Error}`),
-        DOMAIN: Joi.string()
-          .domain()
-          .required()
-          .when('NODE_ENV', {
-            is: EnvironmentConfig.Development,
-            then: Joi.allow('http://localhost:4000'),
-          }),
-        DATABASE_URL: Joi.string().required(),
+        DOMAIN: Joi.string().required(),
+        DATABASE_HOST: Joi.string().required(),
+        DATABASE_PORT: Joi.number().required(),
+        DATABASE_NAME: Joi.string().required(),
+        DATABASE_USERNAME: Joi.string().required(),
+        DATABASE_PASSWORD: Joi.string().required(),
         JWT_ACCESS_SECRET: Joi.string().required(),
         JWT_REFRESH_SECRET: Joi.string().required(),
         SMTP_HOST: Joi.string().required(),
@@ -91,16 +93,35 @@ const Joi = require('joi');
           configService.get<DatabaseConfig>('database');
         return {
           type: 'postgres',
-          host: databaseConfig.databaseHost,
-          port: databaseConfig.databasePort,
-          username: databaseConfig.databaseUsername,
-          password: databaseConfig.databasePassword,
-          database: databaseConfig.databaseName,
+          host: databaseConfig.host,
+          port: databaseConfig.port,
+          username: databaseConfig.username,
+          password: databaseConfig.password,
+          database: databaseConfig.name,
           entities: [__dirname + '/**/*.entity{.ts,.js}'],
           synchronize: true,
           logging: true,
         };
       },
+    }),
+    GraphQLModule.forRootAsync<ApolloDriverConfig>({
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService<Config>) => {
+        const domain: string = configService.get<string>('domain');
+        return {
+          autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
+          debug: true,
+          playground: true,
+          introspection: true,
+          cors: {
+            credentials: true,
+            origin: domain,
+          },
+          context: ({ req, res }) => ({ req, res }),
+          cache: 'bounded',
+        };
+      },
+      driver: ApolloDriver,
     }),
     ScheduleModule.forRoot(),
     UserModule,

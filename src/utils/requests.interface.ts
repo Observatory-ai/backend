@@ -14,4 +14,14 @@ interface RequestWithRefreshToken extends Request {
   refreshToken?: AuthToken;
 }
 
-export { RequestWithUser, RequestWithAccessToken, RequestWithRefreshToken };
+type ExecutionContext = {
+  req: Request;
+  res: Response;
+};
+
+export {
+  RequestWithUser,
+  RequestWithAccessToken,
+  RequestWithRefreshToken,
+  ExecutionContext,
+};

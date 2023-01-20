@@ -1,9 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { Field, InputType } from '@nestjs/graphql';
 import { IsNotEmpty, IsString, Matches, MinLength } from 'class-validator';
 import { Match } from '../../decorators/match.decorator';
 
+@InputType()
 export class ChangePasswordDto {
-  @ApiProperty()
+  @Field()
   @IsNotEmpty({
     message: 'Password can not be empty',
   })
@@ -17,7 +18,7 @@ export class ChangePasswordDto {
   })
   password: string;
 
-  @ApiProperty()
+  @Field()
   @IsNotEmpty({
     message: 'Confirm password can not be empty',
   })
@@ -27,7 +28,7 @@ export class ChangePasswordDto {
   })
   confirmPassword: string;
 
-  @ApiProperty()
+  @Field()
   @IsString()
   token: string;
 }
