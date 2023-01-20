@@ -97,6 +97,12 @@ export class GoogleCalendarService {
       return events;
     }
     return null;
+
+    /* model:
+     * insights array
+     * data array (X axis and Y axis)
+     * data series
+     */
   }
 
   /**

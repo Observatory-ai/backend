@@ -50,12 +50,12 @@ export class GoogleCalendarEventsItems {
   @Field(() => GoogleCalendarEventsItemsStart)
   start: GoogleCalendarEventsItemsStart;
 
-  @Field(() => GoogleCalendarEventsItemsOrganizer)
+  @Field(() => GoogleCalendarEventsItemsOrganizer, { nullable: true })
   organizer: GoogleCalendarEventsItemsOrganizer;
 
-  @Field(() => GoogleCalendarEventsItemsCreator)
+  @Field(() => GoogleCalendarEventsItemsCreator, { nullable: true })
   creator: GoogleCalendarEventsItemsCreator;
 
-  @Field(() => [GoogleCalendarEventsItemsAttendees])
+  @Field(() => [GoogleCalendarEventsItemsAttendees], { nullable: true })
   attendees: [GoogleCalendarEventsItemsAttendees];
 }

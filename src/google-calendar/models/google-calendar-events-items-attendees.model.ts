@@ -2,33 +2,33 @@ import { Field, Int, ObjectType } from '@nestjs/graphql';
 
 @ObjectType()
 export class GoogleCalendarEventsItemsAttendees {
-  @Field()
+  @Field({ nullable: true })
   id: string;
 
-  @Field()
+  @Field({ nullable: true })
   email: string;
 
-  @Field()
+  @Field({ nullable: true })
   displayName: string;
 
-  @Field()
+  @Field({ nullable: true })
   organizer: boolean;
 
-  @Field()
+  @Field({ nullable: true })
   self: boolean;
 
-  @Field()
+  @Field({ nullable: true })
   resource: boolean;
 
-  @Field()
+  @Field({ nullable: true })
   optional: boolean;
 
-  @Field()
+  @Field({ nullable: true })
   responseStatus: string;
 
-  @Field()
+  @Field({ nullable: true })
   comment: string;
 
-  @Field(() => Int)
+  @Field(() => Int, { nullable: true })
   additionalGuests: number;
 }
