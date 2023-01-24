@@ -29,7 +29,6 @@ export class JwtRefreshStrategy extends PassportStrategy(
   }
 
   async validate(request: Request, payload: TokenPayload): Promise<User> {
-    console.log('in strategy');
     return this.authService.validateJWTRefresh(request, payload);
   }
 }
