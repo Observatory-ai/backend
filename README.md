@@ -1,51 +1,15 @@
 # Observatory API
 
 ## Corequisites
+
 This project must be run alongside the frontend. You can find our frontend repository [here](https://github.com/Observatory-ai/frontend).
 
 ## Installation
-
-1. Install the Hasura CLI:
-   [Hasura CLI Installation](https://hasura.io/docs/latest/hasura-cli/install-hasura-cli/)
-
-2. Run the following commands:
 
 ```bash
 docker compose up -d
 yarn install or yarn
 yarn start
-```
-
-3. Start the Hasura Client:
-
-```bash
-Mac: hasura console
-Windows (npm installation): npx hasura console
-```
-
-4. Connect to the observatory database in Hasura
-
-![hasura database connection](https://drive.google.com/uc?id=1b9AEGIfOmNrzf0iZqwMi_YpY9Ll-eCDq)
-
-## Hasura commands
-
-#### Add a migration
-
-```bash
-Mac: hasura migrate create "migration-name" --from-server --database-name observatory
-Windows (npm installation): npx hasura migrate create "migration-name" --from-server --database-name observatory
-```
-
-#### Apply migrations
-
-```bash
-Mac: hasura migrate apply --database-name observatory
-Windows (npm installation): npx hasura migrate apply --database-name observatory
-```
-
-#### Apply metadata
-```
-hasura metadata apply
 ```
 
 ## Example .env file
@@ -56,9 +20,13 @@ NODE_ENV=development
 # Log Level
 LOG_LEVEL=log,warn,error
 # Domain
-DOMAIN= http://localhost:4000
+DOMAIN=http://localhost:4000
 # Database
-DATABASE_URL=postgres://postgres:postgrespassword@localhost:5432/postgres
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_NAME=postgres
+DATABASE_USERNAME=postgres
+DATABASE_PASSWORD=postgrespassword
 # JWT
 JWT_ACCESS_SECRET=
 JWT_REFRESH_SECRET=
