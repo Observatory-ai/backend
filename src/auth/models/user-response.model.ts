@@ -25,7 +25,7 @@ export class UserResponseDto {
   @IsString()
   accessToken: string;
 
-  @Field()
+  @Field({ nullable: true })
   @Expose()
   @IsString()
   avatar: string;

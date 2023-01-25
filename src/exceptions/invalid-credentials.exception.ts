@@ -6,6 +6,6 @@ import { BadRequestException } from '@nestjs/common';
  */
 export class InvalidCredentialsException extends BadRequestException {
   constructor() {
-    super('email: INVALID_CREDENTIALS');
+    super('login:INVALID_CREDENTIALS');
   }
 }

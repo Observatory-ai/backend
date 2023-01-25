@@ -14,7 +14,7 @@ type UserResponseDto {
   email: String!
   username: String!
   accessToken: String!
-  avatar: String!
+  avatar: String
 }
 
 type GoogleCalendarEventsDefaultReminders {
