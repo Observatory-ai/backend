@@ -54,6 +54,14 @@ $ yarn run start:dev
 $ yarn run start:prod
 ```
 
+## Redis Commander
+
+localhost:8081
+
+## Grahql Playground
+
+localhost:3000/graphql
+
 ## Test
 
 ```bash

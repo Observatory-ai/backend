@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { CACHE_MANAGER, Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Cache } from 'cache-manager';
 import { Auth, google } from 'googleapis';
 import { Config, GoogleConfig } from '../config/configuration.interface';
 import { CreateServiceDto } from '../service-integration/dtos/create-service.dto';
@@ -7,6 +8,7 @@ import { Api } from '../service-integration/enum/api.enum';
 import { ServiceType } from '../service-integration/enum/service-type.enum';
 import { ServiceIntegrationService } from '../service-integration/service-integration.service';
 import { User } from '../user/user.entity';
+import { CacheUtil } from '../utils/cache.util';
 import { GoogleCalendarActivationDto } from './dtos/google-calendar-activation.dto';
 import { GoogleCalendarEvents } from './models/google-calendar-events.model';
 
@@ -16,6 +18,8 @@ export class GoogleCalendarService {
   constructor(
     private readonly configService: ConfigService<Config>,
     private readonly serviceIntegrationService: ServiceIntegrationService,
+    @Inject(CACHE_MANAGER)
+    private cacheManager: Cache,
   ) {
     const clientID =
       this.configService.get<GoogleConfig>('google').authClientId;
@@ -92,7 +96,22 @@ export class GoogleCalendarService {
       this.oauthClient.setCredentials({
         refresh_token: service?.refreshToken,
       });
-      const events = await this.getWeeklyTrends();
+
+      const cacheKey = CacheUtil.createCacheKey(
+        user.uuid,
+        ServiceType.google.toString(),
+        Api.Google_Calendar.toString(),
+      );
+
+      console.log(this.cacheManager);
+      const events = await CacheUtil.withCache<GoogleCalendarEvents | null>(
+        cacheKey,
+        this.cacheManager,
+        this.getWeeklyTrends,
+        60 * 60 * 1000,
+      );
+
+      // const events = await this.getWeeklyTrends();
 
       return events;
     }
