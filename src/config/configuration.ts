@@ -14,6 +14,7 @@ export default () => ({
     password: process.env.DATABASE_PASSWORD,
     name: process.env.DATABASE_NAME,
   },
+  cacheURL: process.env.CACHE_URL,
   admin: {
     email: process.env.ADMIN_EMAIL,
     password: process.env.ADMIN_PASSWORD,

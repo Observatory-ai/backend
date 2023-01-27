@@ -18,6 +18,7 @@ interface AppConfig {
   logLevel: LogLevel[];
   domain: string;
   database: DatabaseConfig;
+  cacheURL: string;
 }
 
 /**

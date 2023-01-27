@@ -1,19 +1,13 @@
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
-import {
-  CacheModule,
-  CacheStore,
-  MiddlewareConsumer,
-  Module,
-} from '@nestjs/common';
+import { CacheModule, MiddlewareConsumer, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import * as redisStore from 'cache-manager-redis-store';
 import { join } from 'path';
-import type { RedisClientOptions } from 'redis';
 import { AuditModule } from './audit/audit.module';
 import { AuthModule } from './auth/auth.module';
 import configuration from './config/configuration';
@@ -130,10 +124,17 @@ const Joi = require('joi');
       },
       driver: ApolloDriver,
     }),
-    CacheModule.register<RedisClientOptions>({
+    CacheModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
       isGlobal: true,
-      store: redisStore as unknown as CacheStore,
-      url: 'redis://localhost:6379',
+      useFactory: async (configService: ConfigService<Config>) => {
+        const cacheURL: string = configService.get<string>('cacheURL');
+        return {
+          store: redisStore,
+          url: cacheURL,
+        };
+      },
     }),
     ScheduleModule.forRoot(),
     UserModule,

@@ -103,11 +103,10 @@ export class GoogleCalendarService {
         Api.Google_Calendar.toString(),
       );
 
-      console.log(this.cacheManager);
       const events = await CacheUtil.withCache<GoogleCalendarEvents | null>(
         cacheKey,
         this.cacheManager,
-        this.getWeeklyTrends,
+        this.getWeeklyTrends.bind(this),
         60 * 60 * 1000,
       );
 

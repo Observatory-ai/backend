@@ -24,13 +24,12 @@ export class CacheUtil {
     callback: () => Promise<T>,
     ttl: number,
   ): Promise<T> {
-    console.log('cache obejct::::::::::::::::', cache);
     return cache.get<T>(cacheKey).then((value: T) => {
       if (value) {
         return value;
       } else {
         return callback().then((result: T) => {
-          cache.set(cacheKey, result, ttl);
+          cache.set(cacheKey, result, { ttl });
           return result;
         });
       }
