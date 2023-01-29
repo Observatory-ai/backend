@@ -107,7 +107,7 @@ export class GoogleCalendarService {
         cacheKey,
         this.cacheManager,
         this.getWeeklyTrends.bind(this),
-        60 * 60 * 1000,
+        60 * 60,
       );
 
       // const events = await this.getWeeklyTrends();
